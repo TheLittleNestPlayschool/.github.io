@@ -83,7 +83,11 @@ th{background:#e8ffff;}
     <div class="record-field"><label>Student Name</label><input type="text" id="name" required></div>
     <div class="record-field"><label>Date of Birth</label><input type="date" id="date_of_birth"></div>
     <div class="record-field"><label>Grade</label><input type="text" id="grade"></div>
-    <div class="record-field"><label>Parent ID</label><input type="number" id="parent_id"></div>
+
+    <!-- MODIFIED: Parent dropdown -->
+    <div class="record-field"><label>Parent</label>
+      <select id="parent_id"></select>
+    </div>
   </div>
 
   <div class="record-line">
@@ -161,6 +165,25 @@ th{background:#e8ffff;}
 
 <script>
 const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/student";
+
+const parentApi="https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/parent";  
+let parentList=[];
+
+async function loadParents(){
+  try{
+    const res=await fetch(parentApi);
+    parentList=await res.json();
+
+    const sel=document.getElementById('parent_id');
+    sel.innerHTML='<option value="">Select Parent</option>';
+
+    parentList.forEach(p=>{
+      sel.innerHTML += `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`;
+    });
+
+  }catch(err){ console.error(err); }
+}
+
 let PAGE_SIZE=10;
 let allRecords=[];
 let filteredRecords=[];
@@ -195,12 +218,10 @@ function renderPage(){
     const r=filteredRecords[i];
     const tr=document.createElement('tr');
 
-    // ID Column
     const tdId=document.createElement('td');
     tdId.textContent=r.id;
     tr.appendChild(tdId);
 
-    // Editable Fields
     const tdFields=document.createElement('td');
     tdFields.innerHTML=`
       <div class="record-line-grid">
@@ -245,7 +266,6 @@ function renderPage(){
     `;
     tr.appendChild(tdFields);
 
-    // Actions
     const tdAct=document.createElement('td');
     tdAct.className='actions';
 
@@ -413,9 +433,9 @@ document.getElementById('add-form').addEventListener('submit',async(e)=>{
 });
 
 // ----------------- Initialize -----------------
+loadParents();
 fetchAllRecords();
 </script>
 
 </body>
 </html>
-
