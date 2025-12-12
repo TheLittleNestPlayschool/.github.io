@@ -1,335 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Student Manager</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<title>New Student</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-:root{--max-width:1400px;--gap:10px;}
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  margin:16px auto;
-  padding:18px;
-  max-width:var(--max-width);
-  font-size:15px;
-  background-color:#e8ffff;
-}
-form .record-line{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
-.record-field{display:flex;flex-direction:column}
-input,textarea,select{
-  padding:8px;
-  font-size:14px;
-  box-sizing:border-box;
-  background-color:#ffeffb;
-  border:1px solid #ccc;
-  border-radius:4px;
-}
-textarea{min-height:56px; resize:vertical}
-button{
-  padding:8px 12px;
-  font-size:14px;
-  background-color:#74e8e8;
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-  transition:0.2s;
-}
-button:hover{
-  background-color:#498787;
-  color:#fff;
-}
-.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
-.controls > *{min-width:120px}
-#searchInput{flex:1;min-width:220px;padding:10px;font-size:15px;background-color:#ffeffb;border:1px solid #ccc;border-radius:4px}
-#tableWrapper{
-  max-height:600px;
-  overflow-y:auto;
-  border:1px solid #ddd;
-  padding:8px;
-  border-radius:6px;
-  background:#e8ffff;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  table-layout:fixed;
-  background:#e8ffff;
-}
-th,td{
-  border:1px solid #e6e6e6;
-  padding:8px;
-  vertical-align:top;
-  font-size:13px;
-}
-th{background:#e8ffff;}
-.record-line-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px}
-.record-field label{font-size:12px;color:#333;margin-bottom:6px}
-.actions button{display:block;width:84px;margin:6px auto;padding:6px}
-.pagination{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
-.page-btn{padding:6px 10px;border:1px solid #ccc;background:#74e8e8;color:#000;cursor:pointer;border-radius:4px}
-.page-btn.active{background:#498787;color:#fff;border-color:#498787}
-.compact{font-size:13px}
-@media (max-width:1200px){
-  .record-line-grid{grid-template-columns:repeat(2,1fr)}
-  form .record-line{grid-template-columns:repeat(2,1fr)}
-}
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+    label {
+        font-weight: bold;
+    }
+    input, select, textarea {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
+    button {
+        padding: 10px 20px;
+        cursor: pointer;
+    }
 </style>
 </head>
+
 <body>
 
-<!-- Add Student Form -->
-<form id="add-form" autocomplete="off">
-  <div class="record-line">
-    <div class="record-field"><label>First Name</label><input type="text" id="first_name" required></div>
-    <div class="record-field"><label>Last Name</label><input type="text" id="last_name" required></div>
-    <div class="record-field"><label>Age</label><input type="number" id="age"></div>
-    <div class="record-field">
-      <label>Parent</label>
-      <select id="parent_id" required>
-        <option value="">Loading…</option>
-      </select>
-    </div>
-  </div>
+<h2>New Student</h2>
 
-  <div class="record-line">
-    <div class="record-field"><label>Notes</label><input type="text" id="notes"></div>
-    <div class="record-field"><label>Class</label><input type="text" id="class_name"></div>
-    <div class="record-field"><label>Active?</label><select id="is_active"><option selected>Yes</option><option>No</option></select></div>
-    <div></div>
-  </div>
+<form id="studentForm">
 
-  <div style="margin-top:10px">
-    <button type="submit" style="width:160px;">Add Student</button>
-  </div>
+    <label for="parent_id">Parent</label>
+    <select id="parent_id" name="parent_id" required>
+        <option value="">Loading parent list...</option>
+    </select>
+
+    <label for="name">Student Name</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="date_of_birth">Date of Birth</label>
+    <input type="date" id="date_of_birth" name="date_of_birth" required>
+
+    <label for="grade">Grade</label>
+    <input type="text" id="grade" name="grade">
+
+    <h3>Authorized Pickup 1</h3>
+    <label>Name</label>
+    <input type="text" id="authorized_pickup_1_name" name="authorized_pickup_1_name">
+    <label>Phone</label>
+    <input type="text" id="authorized_pickup_1_phone" name="authorized_pickup_1_phone">
+    <label>Relationship</label>
+    <input type="text" id="authorized_pickup_1_relationship" name="authorized_pickup_1_relationship">
+
+    <h3>Authorized Pickup 2</h3>
+    <label>Name</label>
+    <input type="text" id="authorized_pickup_2_name" name="authorized_pickup_2_name">
+    <label>Phone</label>
+    <input type="text" id="authorized_pickup_2_phone" name="authorized_pickup_2_phone">
+    <label>Relationship</label>
+    <input type="text" id="authorized_pickup_2_relationship" name="authorized_pickup_2_relationship">
+
+    <h3>Authorized Pickup 3</h3>
+    <label>Name</label>
+    <input type="text" id="authorized_pickup_3_name" name="authorized_pickup_3_name">
+    <label>Phone</label>
+    <input type="text" id="authorized_pickup_3_phone" name="authorized_pickup_3_phone">
+    <label>Relationship</label>
+    <input type="text" id="authorized_pickup_3_relationship" name="authorized_pickup_3_relationship">
+
+    <h3>Emergency Contact</h3>
+    <label>Name</label>
+    <input type="text" id="emergency_contact_name" name="emergency_contact_name">
+    <label>Phone</label>
+    <input type="text" id="emergency_contact_phone" name="emergency_contact_phone">
+    <label>Relationship</label>
+    <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship">
+
+    <label for="is_active">Active</label>
+    <select id="is_active" name="is_active">
+        <option value="true" selected>Yes</option>
+        <option value="false">No</option>
+    </select>
+
+    <button type="submit">Save Student</button>
 </form>
 
-<div id="message" style="min-height:22px;margin-bottom:6px"></div>
-
-<!-- Controls -->
-<div class="controls">
-  <input id="searchInput" placeholder="Search name, parent, class..." />
-  <label>
-    Records per page:
-    <select id="pageSizeSelect">
-      <option value="5">5</option>
-      <option value="10" selected>10</option>
-      <option value="20">20</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
-    </select>
-  </label>
-  <button id="printBtn" class="compact">Print</button>
-</div>
-
-<!-- Table -->
-<div id="tableWrapper">
-  <table id="records-table">
-    <thead>
-      <tr>
-        <th style="width:48px">ID</th>
-        <th>All Fields</th>
-        <th style="width:110px">Actions</th>
-      </tr>
-    </thead>
-    <tbody id="table-body"></tbody>
-  </table>
-</div>
-
-<!-- Pagination -->
-<div class="pagination" id="pagination"></div>
-
 <script>
-const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:IzCUrLfD/student";
-let PAGE_SIZE=10;
-let allRecords=[];
-let filteredRecords=[];
-let currentPage=1;
+// ---------------------------------------------------------
+// Load parent list from Xano
+// ---------------------------------------------------------
+document.addEventListener("DOMContentLoaded", function() {
+    const parentSelect = document.getElementById("parent_id");
 
-// Load Parent List into Dropdown
-function loadParents(){
-  const parentSelect=document.getElementById("parent_id");
-  fetch("https://x8ki-letl-twmt.n7.xano.io/api:IzCUrLfD/parent")
-    .then(res=>res.json())
-    .then(data=>{
-      parentSelect.innerHTML='<option value="">Select Parent</option>';
-      data.forEach(p=>{
-        const opt=document.createElement("option");
-        opt.value=p.id;
-        opt.textContent=p.first_name+" "+p.last_name;
-        parentSelect.appendChild(opt);
-      });
+    fetch("https://x8ki-letl-twmt.n7.xano.io/api:IzCUrLfD/parent")
+        .then(response => response.json())
+        .then(data => {
+            parentSelect.innerHTML = '<option value="">Select Parent</option>';
+
+            data.forEach(parent => {
+                const fullName = `${parent.first_name} ${parent.last_name}`;
+                const option = document.createElement("option");
+                option.value = parent.id;
+                option.textContent = fullName;
+                parentSelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            parentSelect.innerHTML = '<option value="">Error loading parents</option>';
+            console.error("Error fetching parents:", error);
+        });
+});
+
+// ---------------------------------------------------------
+// Submit Student to Xano
+// ---------------------------------------------------------
+document.getElementById("studentForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const formData = {
+        parent_id: document.getElementById("parent_id").value,
+        name: document.getElementById("name").value,
+        date_of_birth: document.getElementById("date_of_birth").value,
+        grade: document.getElementById("grade").value,
+        authorized_pickup_1_name: document.getElementById("authorized_pickup_1_name").value,
+        authorized_pickup_1_phone: document.getElementById("authorized_pickup_1_phone").value,
+        authorized_pickup_1_relationship: document.getElementById("authorized_pickup_1_relationship").value,
+        authorized_pickup_2_name: document.getElementById("authorized_pickup_2_name").value,
+        authorized_pickup_2_phone: document.getElementById("authorized_pickup_2_phone").value,
+        authorized_pickup_2_relationship: document.getElementById("authorized_pickup_2_relationship").value,
+        authorized_pickup_3_name: document.getElementById("authorized_pickup_3_name").value,
+        authorized_pickup_3_phone: document.getElementById("authorized_pickup_3_phone").value,
+        authorized_pickup_3_relationship: document.getElementById("authorized_pickup_3_relationship").value,
+        emergency_contact_name: document.getElementById("emergency_contact_name").value,
+        emergency_contact_phone: document.getElementById("emergency_contact_phone").value,
+        emergency_contact_relationship: document.getElementById("emergency_contact_relationship").value,
+        is_active: document.getElementById("is_active").value === "true"
+    };
+
+    fetch("https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/student", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
     })
-    .catch(err=>{
-      console.error("Error loading parents:",err);
-      parentSelect.innerHTML='<option value="">Error Loading</option>';
-    });
-}
-
-// ---------------- Fetch Students ----------------
-async function fetchAllRecords(){
-  try{
-    const res=await fetch(apiBase);
-    allRecords=await res.json();
-    filteredRecords = allRecords.slice();
-    renderPage();
-    renderPagination();
-  }catch(err){console.error(err);}
-}
-
-// ---------------- Table Rendering ----------------
-function renderPage(){
-  const tbody=document.getElementById('table-body');
-  tbody.innerHTML='';
-  let start=(currentPage-1)*PAGE_SIZE;
-  let end=Math.min(start+PAGE_SIZE,filteredRecords.length);
-  for(let i=start;i<end;i++){
-    const r=filteredRecords[i];
-    const tr=document.createElement('tr');
-
-    const tdId=document.createElement('td');
-    tdId.textContent=r.id;
-    tr.appendChild(tdId);
-
-    const tdFields=document.createElement('td');
-    tdFields.innerHTML=`
-      <div class="record-line-grid">
-        <div class="record-field"><label>First Name</label><input value="${r.first_name||''}" data-field="first_name"></div>
-        <div class="record-field"><label>Last Name</label><input value="${r.last_name||''}" data-field="last_name"></div>
-        <div class="record-field"><label>Age</label><input type="number" value="${r.age||''}" data-field="age"></div>
-        <div class="record-field"><label>Parent ID</label><input value="${r.parent_id||''}" data-field="parent_id"></div>
-      </div>
-      <div class="record-line-grid">
-        <div class="record-field"><label>Notes</label><input value="${r.notes||''}" data-field="notes"></div>
-        <div class="record-field"><label>Class</label><input value="${r.class_name||''}" data-field="class_name"></div>
-        <div class="record-field"><label>Active?</label>
-          <select data-field="is_active">
-            <option ${r.is_active?'selected':''}>Yes</option>
-            <option ${!r.is_active?'selected':''}>No</option>
-          </select>
-        </div>
-        <div></div>
-      </div>
-    `;
-    tr.appendChild(tdFields);
-
-    const tdAct=document.createElement('td');
-    tdAct.className='actions';
-
-    const editBtn=document.createElement('button');
-    editBtn.textContent='Edit';
-    editBtn.onclick=()=>{editRow(tr,r.id,editBtn)};
-    tdAct.appendChild(editBtn);
-
-    const delBtn=document.createElement('button');
-    delBtn.textContent='Delete';
-    delBtn.onclick=()=>{deleteRow(r.id)};
-    tdAct.appendChild(delBtn);
-
-    tr.appendChild(tdAct);
-    tbody.appendChild(tr);
-  }
-}
-
-async function editRow(tr,id,btn){
-  if(btn.textContent==='Edit'){
-    btn.textContent='Save';
-    tr.querySelectorAll('input,select').forEach(inp=>inp.disabled=false);
-  } else {
-    btn.disabled=true;
-    const payload={};
-    tr.querySelectorAll('input,select').forEach(inp=>{
-      if(inp.dataset.field){
-        if(inp.dataset.field==='is_active'){
-          payload[inp.dataset.field]=(inp.value==='Yes');
-        } else {
-          payload[inp.dataset.field]=inp.value||null;
-        }
-        inp.disabled=true;
-      }
+    .then(res => res.json())
+    .then(result => {
+        alert("Student saved successfully!");
+        console.log(result);
+    })
+    .catch(err => {
+        alert("Error saving student.");
+        console.error(err);
     });
 
-    try{
-      const res=await fetch(`${apiBase}/${id}`,{
-        method:'PATCH',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(payload)
-      });
-      await res.json();
-      btn.textContent='Edit';
-      fetchAllRecords();
-    }catch(err){console.error(err);}
-    btn.disabled=false;
-  }
-}
-
-async function deleteRow(id){
-  if(!confirm('Delete this student?')) return;
-  try{
-    const res=await fetch(`${apiBase}/${id}`,{method:'DELETE'});
-    await res.json();
-    fetchAllRecords();
-  }catch(err){console.error(err);}
-}
-
-// Search
-document.getElementById('searchInput').addEventListener('input',()=>{
-  let val=document.getElementById('searchInput').value.toLowerCase();
-  filteredRecords=allRecords.filter(r=>{
-    return ((r.first_name||'')+' '+(r.last_name||'')+' '+(r.class_name||'')).toLowerCase().includes(val);
-  });
-  renderPage();
-  renderPagination();
 });
-
-// Pagination
-document.getElementById('pageSizeSelect').addEventListener('change',()=>{
-  PAGE_SIZE=parseInt(document.getElementById('pageSizeSelect').value);
-  currentPage=1;
-  renderPage();
-  renderPagination();
-});
-
-function renderPagination(){
-  const pag=document.getElementById('pagination');
-  pag.innerHTML='';
-  let totalPages=Math.ceil(filteredRecords.length/PAGE_SIZE);
-  for(let i=1;i<=totalPages;i++){
-    const btn=document.createElement('button');
-    btn.textContent=i;
-    btn.className='page-btn'+(i===currentPage?' active':'');
-    btn.onclick=()=>{currentPage=i; renderPage(); renderPagination();};
-    pag.appendChild(btn);
-  }
-}
-
-// Add Form
-document.getElementById('add-form').addEventListener('submit',async(e)=>{
-  e.preventDefault();
-  const payload={
-    first_name:document.getElementById('first_name').value,
-    last_name:document.getElementById('last_name').value,
-    age:parseInt(document.getElementById('age').value)||null,
-    parent_id:parseInt(document.getElementById('parent_id').value)||null,
-    notes:document.getElementById('notes').value,
-    class_name:document.getElementById('class_name').value,
-    is_active:(document.getElementById('is_active').value==='Yes')
-  };
-
-  try{
-    const res=await fetch(apiBase,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
-    await res.json();
-    e.target.reset();
-    fetchAllRecords();
-  }catch(err){console.error(err);}
-});
-
-// Init
-loadParents();
-fetchAllRecords();
 </script>
 
 </body>
