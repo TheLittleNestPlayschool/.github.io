@@ -168,7 +168,7 @@ th{background:#e8ffff;}
 
 <script>
 /* -----------------------------
-   Config — final API group (you moved parents into this group)
+   Config — final API group
 ----------------------------- */
 const API_BASE = "https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N";
 const parentApi = `${API_BASE}/parent`;
@@ -527,6 +527,9 @@ document.getElementById('add-form').addEventListener('submit',async(e)=>{
     authorized_pickup_3_name:document.getElementById('authorized_pickup_3_name').value||'',
     authorized_pickup_3_phone:document.getElementById('authorized_pickup_3_phone').value||'',
     authorized_pickup_3_relationship:document.getElementById('authorized_pickup_3_relationship').value||'',
+    emergency_contact_name:document.getElementById('emergency_contact_name').value||'',
+    emergency_contact_phone:document.getElementById('emergency_contact_phone').value||'',
+    emergency_contact_relationship:document.getElementById('emergency_contact_relationship').value||'',
     is_active:(document.getElementById('is_active').value==='Yes')
   };
   dbg('POST', studentApi, payload);
