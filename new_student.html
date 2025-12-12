@@ -1,410 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>New Student</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  margin: 6px 0 12px 0;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 40px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+</style>
+</head>
+<body>
+
+<h2>New Student</h2>
+
+<label>Parent</label>
+<select id="parent_id">
+  <option value="">Select Parent</option>
+</select>
+
+<label>Student Name</label>
+<input type="text" id="name">
+
+<label>Date of Birth</label>
+<input type="date" id="date_of_birth">
+
+<label>Grade</label>
+<input type="text" id="grade">
+
+<h3>Authorized Pickup 1</h3>
+<label>Name</label>
+<input type="text" id="ap1_name">
+<label>Phone</label>
+<input type="text" id="ap1_phone">
+<label>Relationship</label>
+<input type="text" id="ap1_relationship">
+
+<h3>Authorized Pickup 2</h3>
+<label>Name</label>
+<input type="text" id="ap2_name">
+<label>Phone</label>
+<input type="text" id="ap2_phone">
+<label>Relationship</label>
+<input type="text" id="ap2_relationship">
+
+<h3>Authorized Pickup 3</h3>
+<label>Name</label>
+<input type="text" id="ap3_name">
+<label>Phone</label>
+<input type="text" id="ap3_phone">
+<label>Relationship</label>
+<input type="text" id="ap3_relationship">
+
+<h3>Emergency Contact</h3>
+<label>Name</label>
+<input type="text" id="ec_name">
+<label>Phone</label>
+<input type="text" id="ec_phone">
+<label>Relationship</label>
+<input type="text" id="ec_relationship">
+
+<label>Active</label>
+<select id="is_active">
+  <option value="true">Active</option>
+  <option value="false">Inactive</option>
+</select>
+
+<button id="saveStudent">Save Student</button>
+
+<table id="studentTable">
+<thead>
+<tr>
+  <th>ID</th>
+  <th>Name</th>
+  <th>Parent</th>
+  <th>DOB</th>
+  <th>Grade</th>
+  <th>Active</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
 <script>
-/* -----------------------------
-   Config
------------------------------ */
-const apiBase = "https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/student";
-const parentApi = "https://x8ki-letl-twmt.n7.xano.io/api:IzCUrLfD/parent";
-
-/* -----------------------------
-   State
------------------------------ */
-let PAGE_SIZE = 10;
-let allRecords = [];
-let filteredRecords = [];
-let currentPage = 1;
-let parentList = [];
-
-/* -----------------------------
-   UI Helpers
------------------------------ */
-function showMessage(msg, isError = false) {
-  const m = document.getElementById("message");
-  m.innerHTML = `<div style="color:${isError ? "#a00" : "#060"}">${msg}</div>`;
-}
-function clearMessage() { document.getElementById("message").innerHTML = ""; }
-
-/* -----------------------------
-   Response normalizer
-   Accepts various JSON shapes (array, {data:[]}, {result:[]}, etc.)
------------------------------ */
-function normalizeList(json) {
-  if (!json) return [];
-  if (Array.isArray(json)) return json;
-  if (json.data && Array.isArray(json.data)) return json.data;
-  if (json.result && Array.isArray(json.result)) return json.result;
-  // try to find first array value
-  const found = Object.values(json).find(v => Array.isArray(v));
-  return found || [];
-}
-
-/* -----------------------------
-   Load Parents (robust + logs)
------------------------------ */
+// -----------------------
+// LOAD PARENTS
+// -----------------------
 async function loadParents() {
-  const sel = document.getElementById("parent_id");
-  sel.innerHTML = "<option>Loading parents...</option>";
-  showMessage("Loading parents...");
   try {
-    const res = await fetch(parentApi);
-    console.log("Parent GET status:", res.status, res.statusText);
-    if (!res.ok) {
-      const txt = await res.text().catch(()=>"<no body>");
-      showMessage(`Parent API error ${res.status}: ${txt}`, true);
-      sel.innerHTML = '<option value="">Error loading parents</option>';
-      return [];
-    }
-    const json = await res.json().catch(e => { console.error(e); return null; });
-    console.log("Parent JSON:", json);
-    const list = normalizeList(json);
-    parentList = list;
-    if (!parentList.length) {
-      sel.innerHTML = '<option value="">No parents found</option>';
-      showMessage("No parents found.");
-      return parentList;
-    }
-    sel.innerHTML = '<option value="">Select Parent</option>';
-    parentList.forEach(p => {
-      const id = p.id ?? p.parent_id ?? "";
-      const label = ((p.first_name||"") + " " + (p.last_name||"")).trim() || p.name || p.email || `Parent ${id}`;
+    const res = await fetch("https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/parent");
+    const parents = await res.json();
+
+    const dropdown = document.getElementById("parent_id");
+    dropdown.innerHTML = '<option value="">Select Parent</option>';
+
+    parents.forEach(p => {
       const opt = document.createElement("option");
-      opt.value = id;
-      opt.textContent = label;
-      sel.appendChild(opt);
+      opt.value = p.id;
+      opt.textContent = `${p.first_name} ${p.last_name}`;
+      dropdown.appendChild(opt);
     });
-    clearMessage();
-    return parentList;
   } catch (err) {
     console.error("Error loading parents:", err);
-    sel.innerHTML = '<option value="">Error loading parents</option>';
-    showMessage("Network error loading parents — check console/network.", true);
-    return [];
   }
 }
 
-/* -----------------------------
-   Fetch Students (robust + logs)
------------------------------ */
-async function fetchAllRecords() {
-  showMessage("Loading students...");
+// -----------------------
+// LOAD STUDENTS
+// -----------------------
+async function loadStudents() {
   try {
-    const res = await fetch(apiBase);
-    console.log("Student GET status:", res.status, res.statusText);
-    if (!res.ok) {
-      const txt = await res.text().catch(()=>"<no body>");
-      showMessage(`Student API error ${res.status}: ${txt}`, true);
-      return;
-    }
-    const json = await res.json().catch(e => { console.error(e); return null; });
-    console.log("Student JSON:", json);
-    allRecords = normalizeList(json);
-    filteredRecords = allRecords.slice();
-    renderPage();
-    renderPagination();
-    clearMessage();
-  } catch (err) {
-    console.error("Error fetching students:", err);
-    showMessage("Network error fetching students — check console/network.", true);
-  }
-}
+    const res = await fetch("https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/student");
+    const students = await res.json();
 
-/* -----------------------------
-   Parent options helper
------------------------------ */
-function buildParentOptionsHtml(selectedId) {
-  if (!parentList || !parentList.length) return '<option value="">No parents</option>';
-  let html = '<option value="">Select Parent</option>';
-  parentList.forEach(p => {
-    const id = p.id ?? p.parent_id ?? "";
-    const label = ((p.first_name||"") + " " + (p.last_name||"")).trim() || p.name || p.email || `Parent ${id}`;
-    const sel = String(id) === String(selectedId) ? "selected" : "";
-    html += `<option value="${id}" ${sel}>${label}</option>`;
-  });
-  return html;
-}
+    const tableBody = document.querySelector("#studentTable tbody");
+    tableBody.innerHTML = "";
 
-/* -----------------------------
-   Rendering
------------------------------ */
-function renderPage() {
-  const tbody = document.getElementById("table-body");
-  tbody.innerHTML = "";
-  let start = (currentPage - 1) * PAGE_SIZE;
-  let end = Math.min(start + PAGE_SIZE, filteredRecords.length);
-  for (let i = start; i < end; i++) {
-    const r = filteredRecords[i];
-    const tr = document.createElement("tr");
-
-    // ID
-    const tdId = document.createElement("td");
-    tdId.textContent = r.id;
-    tr.appendChild(tdId);
-
-    // Fields (with editable inputs & parent select)
-    const tdFields = document.createElement("td");
-    const parentSelectHtml = `<div class="record-field"><label>Parent</label>
-      <select data-field="parent_id">${buildParentOptionsHtml(r.parent_id)}</select></div>`;
-
-    tdFields.innerHTML = `
-      <div class="record-line-grid">
-        <div class="record-field"><label>Name</label><input value="${escapeHtml(r.name||'')}" data-field="name"></div>
-        <div class="record-field"><label>Date of Birth</label><input type="date" value="${r.date_of_birth||''}" data-field="date_of_birth"></div>
-        <div class="record-field"><label>Grade</label><input value="${escapeHtml(r.grade||'')}" data-field="grade"></div>
-        ${parentSelectHtml}
-      </div>
-
-      <div class="record-line-grid">
-        <div class="record-field"><label>Emergency Contact Name</label><input value="${escapeHtml(r.emergency_contact_name||'')}" data-field="emergency_contact_name"></div>
-        <div class="record-field"><label>Emergency Contact Phone</label><input value="${escapeHtml(r.emergency_contact_phone||'')}" data-field="emergency_contact_phone"></div>
-        <div class="record-field"><label>Emergency Contact Relationship</label><input value="${escapeHtml(r.emergency_contact_relationship||'')}" data-field="emergency_contact_relationship"></div>
-        <div class="record-field"><label>Active?</label>
-          <select data-field="is_active">
-            <option ${r.is_active ? "selected" : ""}>Yes</option>
-            <option ${!r.is_active ? "selected" : ""}>No</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="record-line-grid">
-        <div class="record-field"><label>Pickup 1 Name</label><input value="${escapeHtml(r.authorized_pickup_1_name||'')}" data-field="authorized_pickup_1_name"></div>
-        <div class="record-field"><label>Pickup 1 Phone</label><input value="${escapeHtml(r.authorized_pickup_1_phone||'')}" data-field="authorized_pickup_1_phone"></div>
-        <div class="record-field"><label>Pickup 1 Relationship</label><input value="${escapeHtml(r.authorized_pickup_1_relationship||'')}" data-field="authorized_pickup_1_relationship"></div>
-        <div></div>
-      </div>
-
-      <div class="record-line-grid">
-        <div class="record-field"><label>Pickup 2 Name</label><input value="${escapeHtml(r.authorized_pickup_2_name||'')}" data-field="authorized_pickup_2_name"></div>
-        <div class="record-field"><label>Pickup 2 Phone</label><input value="${escapeHtml(r.authorized_pickup_2_phone||'')}" data-field="authorized_pickup_2_phone"></div>
-        <div class="record-field"><label>Pickup 2 Relationship</label><input value="${escapeHtml(r.authorized_pickup_2_relationship||'')}" data-field="authorized_pickup_2_relationship"></div>
-        <div></div>
-      </div>
-
-      <div class="record-line-grid">
-        <div class="record-field"><label>Pickup 3 Name</label><input value="${escapeHtml(r.authorized_pickup_3_name||'')}" data-field="authorized_pickup_3_name"></div>
-        <div class="record-field"><label>Pickup 3 Phone</label><input value="${escapeHtml(r.authorized_pickup_3_phone||'')}" data-field="authorized_pickup_3_phone"></div>
-        <div class="record-field"><label>Pickup 3 Relationship</label><input value="${escapeHtml(r.authorized_pickup_3_relationship||'')}" data-field="authorized_pickup_3_relationship"></div>
-        <div></div>
-      </div>
-    `;
-    tr.appendChild(tdFields);
-
-    // Actions
-    const tdAct = document.createElement("td");
-    tdAct.className = "actions";
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "Edit";
-    editBtn.onclick = () => editRow(tr, r.id, editBtn);
-    tdAct.appendChild(editBtn);
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "Delete";
-    delBtn.onclick = () => deleteRow(r.id);
-    tdAct.appendChild(delBtn);
-    tr.appendChild(tdAct);
-
-    tbody.appendChild(tr);
-  }
-}
-
-/* escape for safe injection into attribute values */
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-/* -----------------------------
-   Edit / Save
------------------------------ */
-async function editRow(tr, id, btn) {
-  if (btn.textContent === "Edit") {
-    btn.textContent = "Save";
-    tr.querySelectorAll("input,select").forEach(inp => inp.disabled = false);
-    return;
-  }
-
-  btn.disabled = true;
-  const payload = {};
-  tr.querySelectorAll("input,select").forEach(inp => {
-    if (inp.dataset.field) {
-      const field = inp.dataset.field;
-      if (field === "is_active") payload[field] = (inp.value === "Yes");
-      else if (field === "parent_id") payload[field] = inp.value ? parseInt(inp.value) : null;
-      else payload[field] = inp.value || null;
-      inp.disabled = true;
-    }
-  });
-
-  try {
-    const res = await fetch(`${apiBase}/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+    students.forEach(s => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${s.id}</td>
+        <td>${s.name}</td>
+        <td>${s.parent_id}</td>
+        <td>${s.date_of_birth}</td>
+        <td>${s.grade}</td>
+        <td>${s.is_active}</td>
+      `;
+      tableBody.appendChild(row);
     });
-    console.log("PATCH status", res.status, res.statusText);
-    if (!res.ok) {
-      const txt = await res.text().catch(()=>"<no body>");
-      throw new Error(`PATCH failed ${res.status}: ${txt}`);
-    }
-    const json = await res.json().catch(()=>null);
-    console.log("PATCH response", json);
-    showMessage("Student updated successfully!");
-    btn.textContent = "Edit";
-    await fetchAllRecords();
   } catch (err) {
-    console.error("Error updating:", err);
-    showMessage("Error updating student — see console.", true);
-  } finally {
-    btn.disabled = false;
+    console.error("Error loading students:", err);
   }
 }
 
-/* -----------------------------
-   Delete
------------------------------ */
-async function deleteRow(id) {
-  if (!confirm("Are you sure you want to delete this student?")) return;
-  try {
-    const res = await fetch(`${apiBase}/${id}`, { method: "DELETE" });
-    console.log("DELETE status", res.status, res.statusText);
-    if (!res.ok) {
-      const txt = await res.text().catch(()=>"<no body>");
-      throw new Error(`DELETE failed ${res.status}: ${txt}`);
-    }
-    await res.json().catch(()=>null);
-    showMessage("Student deleted.");
-    await fetchAllRecords();
-  } catch (err) {
-    console.error("Delete error:", err);
-    showMessage("Error deleting student — see console.", true);
-  }
-}
-
-/* -----------------------------
-   Search & Pagination
------------------------------ */
-document.getElementById("searchInput").addEventListener("input", applyFilters);
-document.getElementById("pageSizeSelect").addEventListener("change", () => {
-  PAGE_SIZE = parseInt(document.getElementById("pageSizeSelect").value);
-  currentPage = 1;
-  renderPage();
-  renderPagination();
-});
-
-function applyFilters() {
-  const searchValue = document.getElementById("searchInput").value.toLowerCase();
-  filteredRecords = allRecords.filter(r => {
-    let parentLabel = "";
-    if (parentList && parentList.length) {
-      const p = parentList.find(x => String(x.id) === String(r.parent_id));
-      parentLabel = p ? ((p.first_name || "") + " " + (p.last_name || "")).toLowerCase() : "";
-    }
-    const hay = ((r.name || "") + " " + (r.grade || "") + " " + parentLabel).toLowerCase();
-    return !searchValue || hay.includes(searchValue);
-  });
-  renderPage();
-  renderPagination();
-}
-
-function renderPagination() {
-  const pag = document.getElementById("pagination");
-  pag.innerHTML = "";
-  let totalPages = Math.ceil(filteredRecords.length / PAGE_SIZE) || 1;
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = i;
-    btn.className = "page-btn" + (i === currentPage ? " active" : "");
-    btn.onclick = () => { currentPage = i; renderPage(); renderPagination(); };
-    pag.appendChild(btn);
-  }
-}
-
-/* -----------------------------
-   Print
------------------------------ */
-document.getElementById("printBtn").addEventListener("click", () => {
-  const printWindow = window.open("", "", "width=1000,height=600");
-  let html = '<h2>Student Records</h2><table border="1" cellspacing="0" cellpadding="4"><tr><th>ID</th><th>Name</th><th>DOB</th><th>Grade</th><th>Parent</th><th>Emergency Contact</th><th>Active</th></tr>';
-  filteredRecords.forEach(r => {
-    let parentLabel = "";
-    if (parentList && parentList.length) {
-      const p = parentList.find(x => String(x.id) === String(r.parent_id));
-      parentLabel = p ? ((p.first_name || "") + " " + (p.last_name || "")) : r.parent_id || "";
-    } else parentLabel = r.parent_id || "";
-    html += `<tr>
-      <td>${r.id}</td>
-      <td>${r.name || ""}</td>
-      <td>${r.date_of_birth || ""}</td>
-      <td>${r.grade || ""}</td>
-      <td>${parentLabel}</td>
-      <td>${r.emergency_contact_name || ""}</td>
-      <td>${r.is_active ? "Yes" : "No"}</td>
-    </tr>`;
-  });
-  html += '</table>';
-  printWindow.document.write(html);
-  printWindow.document.close();
-  printWindow.print();
-});
-
-/* -----------------------------
-   Add Form
------------------------------ */
-document.getElementById("add-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
+// -----------------------
+// SAVE STUDENT
+// -----------------------
+document.getElementById("saveStudent").addEventListener("click", async () => {
   const payload = {
+    parent_id: Number(document.getElementById("parent_id").value),
     name: document.getElementById("name").value,
-    date_of_birth: document.getElementById("date_of_birth").value || null,
-    grade: document.getElementById("grade").value || "",
-    parent_id: (document.getElementById("parent_id").value) ? parseInt(document.getElementById("parent_id").value) : null,
-    emergency_contact_name: document.getElementById("emergency_contact_name").value || "",
-    emergency_contact_phone: document.getElementById("emergency_contact_phone").value || "",
-    emergency_contact_relationship: document.getElementById("emergency_contact_relationship").value || "",
-    authorized_pickup_1_name: document.getElementById("authorized_pickup_1_name").value || "",
-    authorized_pickup_1_phone: document.getElementById("authorized_pickup_1_phone").value || "",
-    authorized_pickup_1_relationship: document.getElementById("authorized_pickup_1_relationship").value || "",
-    authorized_pickup_2_name: document.getElementById("authorized_pickup_2_name").value || "",
-    authorized_pickup_2_phone: document.getElementById("authorized_pickup_2_phone").value || "",
-    authorized_pickup_2_relationship: document.getElementById("authorized_pickup_2_relationship").value || "",
-    authorized_pickup_3_name: document.getElementById("authorized_pickup_3_name").value || "",
-    authorized_pickup_3_phone: document.getElementById("authorized_pickup_3_phone").value || "",
-    authorized_pickup_3_relationship: document.getElementById("authorized_pickup_3_relationship").value || "",
-    is_active: (document.getElementById("is_active").value === "Yes")
+    date_of_birth: document.getElementById("date_of_birth").value,
+    grade: document.getElementById("grade").value,
+    authorized_pickup_1_name: document.getElementById("ap1_name").value,
+    authorized_pickup_1_phone: document.getElementById("ap1_phone").value,
+    authorized_pickup_1_relationship: document.getElementById("ap1_relationship").value,
+    authorized_pickup_2_name: document.getElementById("ap2_name").value,
+    authorized_pickup_2_phone: document.getElementById("ap2_phone").value,
+    authorized_pickup_2_relationship: document.getElementById("ap2_relationship").value,
+    authorized_pickup_3_name: document.getElementById("ap3_name").value,
+    authorized_pickup_3_phone: document.getElementById("ap3_phone").value,
+    authorized_pickup_3_relationship: document.getElementById("ap3_relationship").value,
+    emergency_contact_name: document.getElementById("ec_name").value,
+    emergency_contact_phone: document.getElementById("ec_phone").value,
+    emergency_contact_relationship: document.getElementById("ec_relationship").value,
+    is_active: document.getElementById("is_active").value === "true"
   };
 
-  showMessage("Saving student...");
   try {
-    const res = await fetch(apiBase, {
+    await fetch("https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/student", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log("POST status", res.status, res.statusText);
-    if (!res.ok) {
-      const txt = await res.text().catch(()=>"<no body>");
-      throw new Error(`Create failed ${res.status}: ${txt}`);
-    }
-    const json = await res.json().catch(()=>null);
-    console.log("POST response", json);
-    showMessage("Student added successfully!");
-    document.getElementById("add-form").reset();
-    // refresh list
-    await fetchAllRecords();
+
+    loadStudents();
+    alert("Student Saved!");
   } catch (err) {
-    console.error("Error adding student:", err);
-    showMessage("Error adding student — see console/network.", true);
+    console.error("Save error:", err);
   }
 });
 
-/* -----------------------------
-   Init
-   Load parents first, then students
------------------------------ */
-loadParents()
-  .then(() => fetchAllRecords())
-  .catch(err => {
-    console.error("Init error:", err);
-    showMessage("Initialization error — see console.", true);
-  });
+// INITIAL LOAD
+loadParents();
+loadStudents();
 </script>
+
+</body>
+</html>
+
