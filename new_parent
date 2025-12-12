@@ -82,23 +82,21 @@ th{background:#e8ffff;}
   <div class="record-line">
     <div class="record-field"><label>First Name</label><input type="text" id="first_name" required></div>
     <div class="record-field"><label>Last Name</label><input type="text" id="last_name" required></div>
-    <div class="record-field"><label>Created At (date/time)</label><input type="datetime-local" id="created_at"></div>
-    <div class="record-field"><label>User ID</label><input type="number" id="user_id"></div>
-  </div>
-  <div class="record-line">
-    <div class="record-field"><label>Phone</label><input type="text" id="phone"></div>
-    <div class="record-field"><label>Address</label><input type="text" id="address"></div>
-    <div class="record-field"><label>Is Active</label><select id="is_active"><option>Yes</option><option>No</option></select></div>
-    <div class="record-field"><label>Inactivation Comments</label><input type="text" id="inactivation_reason_comments"></div>
-  </div>
-  <div class="record-line">
-    <div class="record-field"><label>Last Class Attended Date</label><input type="date" id="last_class_attended_date"></div>
     <div class="record-field"><label>Email</label><input type="email" id="email"></div>
-    <div class="record-field"><label>ID (auto)</label><input type="text" id="id_field" placeholder="auto" disabled></div>
-    <div class="record-field"><label>&nbsp;</label><div></div></div>
+    <div class="record-field"><label>Phone</label><input type="text" id="phone"></div>
+  </div>
+  <div class="record-line">
+    <div class="record-field"><label>Address</label><input type="text" id="address"></div>
+    <div class="record-field"><label>User ID</label><input type="number" id="user_id"></div>
+    <div class="record-field"><label>Last Class Attended</label><input type="date" id="last_class_attended_date"></div>
+    <div class="record-field"><label>Active?</label><select id="is_active"><option selected>Yes</option><option>No</option></select></div>
+  </div>
+  <div class="record-line">
+    <div class="record-field"><label>Inactivation Comments</label><input type="text" id="inactivation_reason_comments"></div>
+    <div></div><div></div><div></div>
   </div>
   <div style="margin-top:10px">
-    <button type="submit" style="width:140px;">Add Parent</button>
+    <button type="submit" style="width:160px;">Add Parent</button>
   </div>
 </form>
 
@@ -106,7 +104,7 @@ th{background:#e8ffff;}
 
 <!-- Controls -->
 <div class="controls">
-  <input id="searchInput" placeholder="Search first name, last name, phone, email, address..." />
+  <input id="searchInput" placeholder="Search name, phone, email..." />
   <label>
     Records per page:
     <select id="pageSizeSelect">
@@ -138,11 +136,11 @@ th{background:#e8ffff;}
 <div class="pagination" id="pagination"></div>
 
 <script>
-const apiBase = "https://x8ki-letl-twmt.n7.xano.io/api:IzCUrLfD/parent";
-let PAGE_SIZE = 10;
-let allRecords = [];
-let filteredRecords = [];
-let currentPage = 1;
+const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:IzCUrLfD/parent";
+let PAGE_SIZE=10;
+let allRecords=[];
+let filteredRecords=[];
+let currentPage=1;
 
 // ----------------- Helpers -----------------
 function showMessage(html,isError=false){
@@ -150,26 +148,12 @@ function showMessage(html,isError=false){
   m.innerHTML=`<div class="${isError?'error':'success'}">${html}</div>`;
   setTimeout(()=>{ if(m.innerHTML.includes('success')) m.innerHTML=''; },3000);
 }
-function epochToDatetimeLocal(ms){
-  if(ms===null||ms===undefined||ms==='') return '';
-  const d=new Date(Number(ms));
-  if(isNaN(d.getTime())) return '';
-  // returns YYYY-MM-DDTHH:MM
-  return d.toISOString().slice(0,16);
-}
-function datetimeLocalToEpoch(value){
-  if(!value) return null;
-  const t = new Date(value);
-  const ms = t.getTime();
-  return isNaN(ms)?null:ms;
-}
 
 // ----------------- Fetch Records -----------------
 async function fetchAllRecords(){
   try{
     const res=await fetch(apiBase);
     allRecords=await res.json();
-    // normalize types if needed
     filteredRecords = allRecords.slice();
     renderPage();
     renderPagination();
@@ -185,6 +169,7 @@ function renderPage(){
   for(let i=start;i<end;i++){
     const r=filteredRecords[i];
     const tr=document.createElement('tr');
+
     const tdId=document.createElement('td');
     tdId.textContent=r.id;
     tr.appendChild(tdId);
@@ -192,45 +177,43 @@ function renderPage(){
     const tdFields=document.createElement('td');
     tdFields.innerHTML=`
       <div class="record-line-grid">
-        <div class="record-field"><label>First Name</label><input value="${escapeHtml(r.first_name||'')}" data-field="first_name"></div>
-        <div class="record-field"><label>Last Name</label><input value="${escapeHtml(r.last_name||'')}" data-field="last_name"></div>
-        <div class="record-field"><label>Created At</label><input type="datetime-local" value="${epochToDatetimeLocal(r.created_at)}" data-field="created_at"></div>
-        <div class="record-field"><label>User ID</label><input type="number" value="${r.user_id||''}" data-field="user_id"></div>
+        <div class="record-field"><label>First Name</label><input value="${r.first_name||''}" data-field="first_name"></div>
+        <div class="record-field"><label>Last Name</label><input value="${r.last_name||''}" data-field="last_name"></div>
+        <div class="record-field"><label>Email</label><input value="${r.email||''}" data-field="email"></div>
+        <div class="record-field"><label>Phone</label><input value="${r.phone||''}" data-field="phone"></div>
       </div>
       <div class="record-line-grid">
-        <div class="record-field"><label>Phone</label><input value="${escapeHtml(r.phone||'')}" data-field="phone"></div>
-        <div class="record-field"><label>Address</label><input value="${escapeHtml(r.address||'')}" data-field="address"></div>
-        <div class="record-field"><label>Is Active</label>
+        <div class="record-field"><label>Address</label><input value="${r.address||''}" data-field="address"></div>
+        <div class="record-field"><label>User ID</label><input value="${r.user_id||''}" type="number" data-field="user_id"></div>
+        <div class="record-field"><label>Last Class Attended</label><input type="date" value="${r.last_class_attended_date||''}" data-field="last_class_attended_date"></div>
+        <div class="record-field"><label>Active?</label>
           <select data-field="is_active">
-            <option ${r.is_active? 'selected':''}>Yes</option>
-            <option ${r.is_active? '':'selected'}>No</option>
+            <option ${r.is_active?'selected':''}>Yes</option>
+            <option ${!r.is_active?'selected':''}>No</option>
           </select>
         </div>
-        <div class="record-field"><label>Inactivation Comments</label><input value="${escapeHtml(r.inactivation_reason_comments||'')}" data-field="inactivation_reason_comments"></div>
       </div>
       <div class="record-line-grid">
-        <div class="record-field"><label>Last Class Attended Date</label><input type="date" value="${r.last_class_attended_date||''}" data-field="last_class_attended_date"></div>
-        <div class="record-field"><label>Email</label><input type="email" value="${escapeHtml(r.email||'')}" data-field="email"></div>
-        <div class="record-field"><label>ID</label><input value="${r.id||''}" disabled></div>
-        <div class="record-field"><label>&nbsp;</label><div></div></div>
+        <div class="record-field"><label>Inactivation Comments</label><input value="${r.inactivation_reason_comments||''}" data-field="inactivation_reason_comments"></div>
+        <div></div><div></div><div></div>
       </div>
     `;
     tr.appendChild(tdFields);
 
     const tdAct=document.createElement('td');
     tdAct.className='actions';
+
     const editBtn=document.createElement('button');
     editBtn.textContent='Edit';
     editBtn.onclick=()=>{editRow(tr,r.id,editBtn)};
     tdAct.appendChild(editBtn);
+
     const delBtn=document.createElement('button');
     delBtn.textContent='Delete';
     delBtn.onclick=()=>{deleteRow(r.id)};
     tdAct.appendChild(delBtn);
-    tr.appendChild(tdAct);
 
-    // disable inputs initially
-    tr.querySelectorAll('input,select').forEach(inp=>inp.disabled=true);
+    tr.appendChild(tdAct);
 
     tbody.appendChild(tr);
   }
@@ -241,23 +224,15 @@ async function editRow(tr,id,btn){
   if(btn.textContent==='Edit'){
     btn.textContent='Save';
     tr.querySelectorAll('input,select').forEach(inp=>inp.disabled=false);
-    // leave ID disabled
-    const idInput = tr.querySelector('input[disabled]');
-    if(idInput) idInput.disabled=true;
   } else {
     btn.disabled=true;
     const payload={};
     tr.querySelectorAll('input,select').forEach(inp=>{
       if(inp.dataset.field){
-        const field = inp.dataset.field;
-        if(field==='is_active'){
-          payload[field] = (inp.value === 'Yes');
-        } else if(field==='user_id'){
-          payload[field] = inp.value? parseInt(inp.value) : null;
-        } else if(field==='created_at'){
-          payload[field] = datetimeLocalToEpoch(inp.value);
+        if(inp.dataset.field==='is_active'){
+          payload[inp.dataset.field]=(inp.value==='Yes');
         } else {
-          payload[field] = inp.value || null;
+          payload[inp.dataset.field]=inp.value||null;
         }
         inp.disabled=true;
       }
@@ -279,7 +254,7 @@ async function editRow(tr,id,btn){
 
 // ----------------- Delete -----------------
 async function deleteRow(id){
-  if(!confirm('Are you sure you want to delete this record?')) return;
+  if(!confirm('Are you sure you want to delete this parent?')) return;
   try{
     const res=await fetch(`${apiBase}/${id}`,{method:'DELETE'});
     await res.json();
@@ -300,10 +275,9 @@ document.getElementById('pageSizeSelect').addEventListener('change',()=>{
 function applyFilters(){
   let searchValue=document.getElementById('searchInput').value.toLowerCase();
   filteredRecords = allRecords.filter(r=>{
-    let hay = ((r.first_name||'') + ' ' + (r.last_name||'') + ' ' + (r.phone||'') + ' ' + (r.email||'') + ' ' + (r.address||'')).toLowerCase();
+    let hay=((r.first_name||'')+' '+(r.last_name||'')+' '+(r.phone||'')+' '+(r.email||'')).toLowerCase();
     return !searchValue || hay.includes(searchValue);
   });
-  currentPage = 1;
   renderPage();
   renderPagination();
 }
@@ -311,11 +285,12 @@ function applyFilters(){
 function renderPagination(){
   const pag=document.getElementById('pagination');
   pag.innerHTML='';
-  let totalPages=Math.max(1,Math.ceil(filteredRecords.length/PAGE_SIZE));
+  let totalPages=Math.ceil(filteredRecords.length/PAGE_SIZE);
   for(let i=1;i<=totalPages;i++){
     const btn=document.createElement('button');
     btn.textContent=i;
     btn.className='page-btn'+(i===currentPage?' active':'');
+
     btn.onclick=()=>{currentPage=i; renderPage(); renderPagination();};
     pag.appendChild(btn);
   }
@@ -324,23 +299,19 @@ function renderPagination(){
 // ----------------- Print -----------------
 document.getElementById('printBtn').addEventListener('click',()=>{
   const printWindow=window.open('','','width=1000,height=600');
-  let html='<h2>Parent Records</h2><table border="1" cellspacing="0" cellpadding="4"><tr>' +
-    '<th>ID</th><th>Created At</th><th>User ID</th><th>First Name</th><th>Last Name</th><th>Phone</th>' +
-    '<th>Address</th><th>Is Active</th><th>Inactivation Comments</th><th>Last Class Attended</th><th>Email</th></tr>';
+  let html='<h2>Parent Records</h2><table border="1" cellspacing="0" cellpadding="4"><tr><th>ID</th><th>First</th><th>Last</th><th>Email</th><th>Phone</th><th>Address</th><th>User ID</th><th>Last Class</th><th>Active</th><th>Comments</th></tr>';
   filteredRecords.forEach(r=>{
-    const created = r.created_at ? new Date(Number(r.created_at)).toLocaleString() : '';
     html+=`<tr>
-      <td>${r.id||''}</td>
-      <td>${escapeHtml(created)}</td>
+      <td>${r.id}</td>
+      <td>${r.first_name||''}</td>
+      <td>${r.last_name||''}</td>
+      <td>${r.email||''}</td>
+      <td>${r.phone||''}</td>
+      <td>${r.address||''}</td>
       <td>${r.user_id||''}</td>
-      <td>${escapeHtml(r.first_name||'')}</td>
-      <td>${escapeHtml(r.last_name||'')}</td>
-      <td>${escapeHtml(r.phone||'')}</td>
-      <td>${escapeHtml(r.address||'')}</td>
-      <td>${r.is_active? 'Yes':'No'}</td>
-      <td>${escapeHtml(r.inactivation_reason_comments||'')}</td>
       <td>${r.last_class_attended_date||''}</td>
-      <td>${escapeHtml(r.email||'')}</td>
+      <td>${r.is_active?'Yes':'No'}</td>
+      <td>${r.inactivation_reason_comments||''}</td>
     </tr>`;
   });
   html+='</table>';
@@ -352,18 +323,18 @@ document.getElementById('printBtn').addEventListener('click',()=>{
 // ----------------- Add Form -----------------
 document.getElementById('add-form').addEventListener('submit',async(e)=>{
   e.preventDefault();
-  const payload = {
-    first_name: document.getElementById('first_name').value || null,
-    last_name: document.getElementById('last_name').value || null,
-    created_at: datetimeLocalToEpoch(document.getElementById('created_at').value),
-    user_id: document.getElementById('user_id').value ? parseInt(document.getElementById('user_id').value) : null,
-    phone: document.getElementById('phone').value || null,
-    address: document.getElementById('address').value || null,
-    is_active: (document.getElementById('is_active').value === 'Yes'),
-    inactivation_reason_comments: document.getElementById('inactivation_reason_comments').value || null,
-    last_class_attended_date: document.getElementById('last_class_attended_date').value || null,
-    email: document.getElementById('email').value || null
+  const payload={
+    first_name:document.getElementById('first_name').value,
+    last_name:document.getElementById('last_name').value,
+    email:document.getElementById('email').value,
+    phone:document.getElementById('phone').value,
+    address:document.getElementById('address').value,
+    user_id:parseInt(document.getElementById('user_id').value)||null,
+    last_class_attended_date:document.getElementById('last_class_attended_date').value||null,
+    is_active:(document.getElementById('is_active').value==='Yes'),
+    inactivation_reason_comments:document.getElementById('inactivation_reason_comments').value||''
   };
+
   try{
     const res=await fetch(apiBase,{
       method:'POST',
@@ -376,17 +347,6 @@ document.getElementById('add-form').addEventListener('submit',async(e)=>{
     fetchAllRecords();
   }catch(err){console.error(err);showMessage('Error adding parent:'+err,true);}
 });
-
-// ----------------- Utility: escape HTML to avoid breaking the table -----------------
-function escapeHtml(unsafe){
-  if(unsafe===null || unsafe===undefined) return '';
-  return String(unsafe)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/\"/g, "&quot;")
-    .replace(/\'/g, "&#039;");
-}
 
 // ----------------- Initialize -----------------
 fetchAllRecords();
