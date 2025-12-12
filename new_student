@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Student Manager</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+:root{--max-width:1400px;--gap:10px;}
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  margin:16px auto;
+  padding:18px;
+  max-width:var(--max-width);
+  font-size:15px;
+  background-color:#e8ffff;
+}
+form .record-line{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+.record-field{display:flex;flex-direction:column}
+input,textarea,select{
+  padding:8px;
+  font-size:14px;
+  box-sizing:border-box;
+  background-color:#ffeffb;
+  border:1px solid #ccc;
+  border-radius:4px;
+}
+textarea{min-height:56px; resize:vertical}
+button{
+  padding:8px 12px;
+  font-size:14px;
+  background-color:#74e8e8;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  transition:0.2s;
+}
+button:hover{
+  background-color:#498787;
+  color:#fff;
+}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.controls > *{min-width:120px}
+#searchInput{flex:1;min-width:220px;padding:10px;font-size:15px;background-color:#ffeffb;border:1px solid #ccc;border-radius:4px}
+#tableWrapper{
+  max-height:600px;
+  overflow-y:auto;
+  border:1px solid #ddd;
+  padding:8px;
+  border-radius:6px;
+  background:#e8ffff;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  background:#e8ffff;
+}
+th,td{
+  border:1px solid #e6e6e6;
+  padding:8px;
+  vertical-align:top;
+  font-size:13px;
+}
+th{background:#e8ffff;}
+.record-line-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px}
+.record-field label{font-size:12px;color:#333;margin-bottom:6px}
+.actions button{display:block;width:84px;margin:6px auto;padding:6px}
+.pagination{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.page-btn{padding:6px 10px;border:1px solid #ccc;background:#74e8e8;color:#000;cursor:pointer;border-radius:4px}
+.page-btn.active{background:#498787;color:#fff;border-color:#498787}
+.compact{font-size:13px}
+@media (max-width:1200px){
+  .record-line-grid{grid-template-columns:repeat(2,1fr)}
+  form .record-line{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- Add Student Form -->
+<form id="add-form" autocomplete="off">
+  <div class="record-line">
+    <div class="record-field"><label>Student Name</label><input type="text" id="name" required></div>
+    <div class="record-field"><label>Date of Birth</label><input type="date" id="date_of_birth"></div>
+    <div class="record-field"><label>Grade</label><input type="text" id="grade"></div>
+    <div class="record-field"><label>Parent ID</label><input type="number" id="parent_id"></div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field"><label>Emergency Contact Name</label><input type="text" id="emergency_contact_name"></div>
+    <div class="record-field"><label>Emergency Contact Phone</label><input type="text" id="emergency_contact_phone"></div>
+    <div class="record-field"><label>Emergency Contact Relationship</label><input type="text" id="emergency_contact_relationship"></div>
+    <div class="record-field"><label>Active?</label>
+      <select id="is_active">
+        <option selected>Yes</option>
+        <option>No</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field"><label>Pickup 1 Name</label><input type="text" id="authorized_pickup_1_name"></div>
+    <div class="record-field"><label>Pickup 1 Phone</label><input type="text" id="authorized_pickup_1_phone"></div>
+    <div class="record-field"><label>Pickup 1 Relationship</label><input type="text" id="authorized_pickup_1_relationship"></div>
+    <div></div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field"><label>Pickup 2 Name</label><input type="text" id="authorized_pickup_2_name"></div>
+    <div class="record-field"><label>Pickup 2 Phone</label><input type="text" id="authorized_pickup_2_phone"></div>
+    <div class="record-field"><label>Pickup 2 Relationship</label><input type="text" id="authorized_pickup_2_relationship"></div>
+    <div></div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field"><label>Pickup 3 Name</label><input type="text" id="authorized_pickup_3_name"></div>
+    <div class="record-field"><label>Pickup 3 Phone</label><input type="text" id="authorized_pickup_3_phone"></div>
+    <div class="record-field"><label>Pickup 3 Relationship</label><input type="text" id="authorized_pickup_3_relationship"></div>
+    <div></div>
+  </div>
+
+  <div style="margin-top:10px">
+    <button type="submit" style="width:160px;">Add Student</button>
+  </div>
+</form>
+
+<div id="message" style="min-height:22px;margin-bottom:6px"></div>
+
+<!-- Controls -->
+<div class="controls">
+  <input id="searchInput" placeholder="Search name, grade, parent..." />
+  <label>
+    Records per page:
+    <select id="pageSizeSelect">
+      <option value="5">5</option>
+      <option value="10" selected>10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+  </label>
+  <button id="printBtn" class="compact">Print</button>
+</div>
+
+<!-- Table -->
+<div id="tableWrapper">
+  <table id="records-table">
+    <thead>
+      <tr>
+        <th style="width:48px">ID</th>
+        <th>All Fields</th>
+        <th style="width:110px">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+<div class="pagination" id="pagination"></div>
+
+<script>
+const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/student";
+let PAGE_SIZE=10;
+let allRecords=[];
+let filteredRecords=[];
+let currentPage=1;
+
+// ----------------- Helpers -----------------
+function showMessage(html,isError=false){
+  const m=document.getElementById('message');
+  m.innerHTML=`<div class="${isError?'error':'success'}">${html}</div>`;
+  setTimeout(()=>{ if(m.innerHTML.includes('success')) m.innerHTML=''; },3000);
+}
+
+// ----------------- Fetch Records -----------------
+async function fetchAllRecords(){
+  try{
+    const res=await fetch(apiBase);
+    allRecords=await res.json();
+    filteredRecords = allRecords.slice();
+    renderPage();
+    renderPagination();
+  }catch(err){console.error(err);showMessage('Error fetching records:'+err,true);}
+}
+
+// ----------------- Render Table -----------------
+function renderPage(){
+  const tbody=document.getElementById('table-body');
+  tbody.innerHTML='';
+  let start=(currentPage-1)*PAGE_SIZE;
+  let end=Math.min(start+PAGE_SIZE,filteredRecords.length);
+
+  for(let i=start;i<end;i++){
+    const r=filteredRecords[i];
+    const tr=document.createElement('tr');
+
+    // ID Column
+    const tdId=document.createElement('td');
+    tdId.textContent=r.id;
+    tr.appendChild(tdId);
+
+    // Editable Fields
+    const tdFields=document.createElement('td');
+    tdFields.innerHTML=`
+      <div class="record-line-grid">
+        <div class="record-field"><label>Name</label><input value="${r.name||''}" data-field="name"></div>
+        <div class="record-field"><label>Date of Birth</label><input type="date" value="${r.date_of_birth||''}" data-field="date_of_birth"></div>
+        <div class="record-field"><label>Grade</label><input value="${r.grade||''}" data-field="grade"></div>
+        <div class="record-field"><label>Parent ID</label><input type="number" value="${r.parent_id||''}" data-field="parent_id"></div>
+      </div>
+
+      <div class="record-line-grid">
+        <div class="record-field"><label>Emergency Contact Name</label><input value="${r.emergency_contact_name||''}" data-field="emergency_contact_name"></div>
+        <div class="record-field"><label>Emergency Contact Phone</label><input value="${r.emergency_contact_phone||''}" data-field="emergency_contact_phone"></div>
+        <div class="record-field"><label>Emergency Contact Relationship</label><input value="${r.emergency_contact_relationship||''}" data-field="emergency_contact_relationship"></div>
+        <div class="record-field"><label>Active?</label>
+          <select data-field="is_active">
+            <option ${r.is_active?'selected':''}>Yes</option>
+            <option ${!r.is_active?'selected':''}>No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="record-line-grid">
+        <div class="record-field"><label>Pickup 1 Name</label><input value="${r.authorized_pickup_1_name||''}" data-field="authorized_pickup_1_name"></div>
+        <div class="record-field"><label>Pickup 1 Phone</label><input value="${r.authorized_pickup_1_phone||''}" data-field="authorized_pickup_1_phone"></div>
+        <div class="record-field"><label>Pickup 1 Relationship</label><input value="${r.authorized_pickup_1_relationship||''}" data-field="authorized_pickup_1_relationship"></div>
+        <div></div>
+      </div>
+
+      <div class="record-line-grid">
+        <div class="record-field"><label>Pickup 2 Name</label><input value="${r.authorized_pickup_2_name||''}" data-field="authorized_pickup_2_name"></div>
+        <div class="record-field"><label>Pickup 2 Phone</label><input value="${r.authorized_pickup_2_phone||''}" data-field="authorized_pickup_2_phone"></div>
+        <div class="record-field"><label>Pickup 2 Relationship</label><input value="${r.authorized_pickup_2_relationship||''}" data-field="authorized_pickup_2_relationship"></div>
+        <div></div>
+      </div>
+
+      <div class="record-line-grid">
+        <div class="record-field"><label>Pickup 3 Name</label><input value="${r.authorized_pickup_3_name||''}" data-field="authorized_pickup_3_name"></div>
+        <div class="record-field"><label>Pickup 3 Phone</label><input value="${r.authorized_pickup_3_phone||''}" data-field="authorized_pickup_3_phone"></div>
+        <div class="record-field"><label>Pickup 3 Relationship</label><input value="${r.authorized_pickup_3_relationship||''}" data-field="authorized_pickup_3_relationship"></div>
+        <div></div>
+      </div>
+    `;
+    tr.appendChild(tdFields);
+
+    // Actions
+    const tdAct=document.createElement('td');
+    tdAct.className='actions';
+
+    const editBtn=document.createElement('button');
+    editBtn.textContent='Edit';
+    editBtn.onclick=()=>editRow(tr,r.id,editBtn);
+    tdAct.appendChild(editBtn);
+
+    const delBtn=document.createElement('button');
+    delBtn.textContent='Delete';
+    delBtn.onclick=()=>deleteRow(r.id);
+    tdAct.appendChild(delBtn);
+
+    tr.appendChild(tdAct);
+    tbody.appendChild(tr);
+  }
+}
+
+// ----------------- Edit / Save -----------------
+async function editRow(tr,id,btn){
+  if(btn.textContent==='Edit'){
+    btn.textContent='Save';
+    tr.querySelectorAll('input,select').forEach(inp=>inp.disabled=false);
+  } else {
+    btn.disabled=true;
+    const payload={};
+
+    tr.querySelectorAll('input,select').forEach(inp=>{
+      if(inp.dataset.field){
+        if(inp.dataset.field==='is_active'){
+          payload[inp.dataset.field]=(inp.value==='Yes');
+        } else {
+          payload[inp.dataset.field]=inp.value||null;
+        }
+        inp.disabled=true;
+      }
+    });
+
+    try{
+      const res=await fetch(`${apiBase}/${id}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
+      await res.json();
+      showMessage('Student updated successfully!');
+      btn.textContent='Edit';
+      fetchAllRecords();
+    }catch(err){console.error(err); showMessage('Error updating student:'+err,true);}
+    btn.disabled=false;
+  }
+}
+
+// ----------------- Delete -----------------
+async function deleteRow(id){
+  if(!confirm('Are you sure you want to delete this student?')) return;
+  try{
+    const res=await fetch(`${apiBase}/${id}`,{method:'DELETE'});
+    await res.json();
+    showMessage('Student deleted successfully!');
+    fetchAllRecords();
+  }catch(err){console.error(err); showMessage('Error deleting student:'+err,true);}
+}
+
+// ----------------- Search & Pagination -----------------
+document.getElementById('searchInput').addEventListener('input',applyFilters);
+document.getElementById('pageSizeSelect').addEventListener('change',()=>{
+  PAGE_SIZE=parseInt(document.getElementById('pageSizeSelect').value);
+  currentPage=1;
+  renderPage();
+  renderPagination();
+});
+
+function applyFilters(){
+  let searchValue=document.getElementById('searchInput').value.toLowerCase();
+
+  filteredRecords = allRecords.filter(r=>{
+    let hay=((r.name||'')+' '+(r.grade||'')+' '+(r.parent_id||'')).toLowerCase();
+    return !searchValue || hay.includes(searchValue);
+  });
+
+  renderPage();
+  renderPagination();
+}
+
+function renderPagination(){
+  const pag=document.getElementById('pagination');
+  pag.innerHTML='';
+  let totalPages=Math.ceil(filteredRecords.length/PAGE_SIZE);
+
+  for(let i=1;i<=totalPages;i++){
+    const btn=document.createElement('button');
+    btn.textContent=i;
+    btn.className='page-btn'+(i===currentPage?' active':'');
+
+    btn.onclick=()=>{currentPage=i; renderPage(); renderPagination();};
+    pag.appendChild(btn);
+  }
+}
+
+// ----------------- Print -----------------
+document.getElementById('printBtn').addEventListener('click',()=>{
+  const printWindow=window.open('','','width=1000,height=600');
+
+  let html='<h2>Student Records</h2><table border="1" cellspacing="0" cellpadding="4"><tr><th>ID</th><th>Name</th><th>DOB</th><th>Grade</th><th>Parent</th><th>Emergency Contact</th><th>Active</th></tr>';
+
+  filteredRecords.forEach(r=>{
+    html+=`<tr>
+      <td>${r.id}</td>
+      <td>${r.name||''}</td>
+      <td>${r.date_of_birth||''}</td>
+      <td>${r.grade||''}</td>
+      <td>${r.parent_id||''}</td>
+      <td>${r.emergency_contact_name||''}</td>
+      <td>${r.is_active?'Yes':'No'}</td>
+    </tr>`;
+  });
+
+  html+='</table>';
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.print();
+});
+
+// ----------------- Add Form -----------------
+document.getElementById('add-form').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+
+  const payload={
+    name:document.getElementById('name').value,
+    date_of_birth:document.getElementById('date_of_birth').value||null,
+    grade:document.getElementById('grade').value||'',
+    parent_id:parseInt(document.getElementById('parent_id').value)||null,
+
+    emergency_contact_name:document.getElementById('emergency_contact_name').value||'',
+    emergency_contact_phone:document.getElementById('emergency_contact_phone').value||'',
+    emergency_contact_relationship:document.getElementById('emergency_contact_relationship').value||'',
+
+    authorized_pickup_1_name:document.getElementById('authorized_pickup_1_name').value||'',
+    authorized_pickup_1_phone:document.getElementById('authorized_pickup_1_phone').value||'',
+    authorized_pickup_1_relationship:document.getElementById('authorized_pickup_1_relationship').value||'',
+
+    authorized_pickup_2_name:document.getElementById('authorized_pickup_2_name').value||'',
+    authorized_pickup_2_phone:document.getElementById('authorized_pickup_2_phone').value||'',
+    authorized_pickup_2_relationship:document.getElementById('authorized_pickup_2_relationship').value||'',
+
+    authorized_pickup_3_name:document.getElementById('authorized_pickup_3_name').value||'',
+    authorized_pickup_3_phone:document.getElementById('authorized_pickup_3_phone').value||'',
+    authorized_pickup_3_relationship:document.getElementById('authorized_pickup_3_relationship').value||'',
+
+    is_active:(document.getElementById('is_active').value==='Yes')
+  };
+
+  try{
+    const res=await fetch(apiBase,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    await res.json();
+    showMessage('Student added successfully!');
+    e.target.reset();
+    fetchAllRecords();
+  }catch(err){console.error(err);showMessage('Error adding student:'+err,true);}
+});
+
+// ----------------- Initialize -----------------
+fetchAllRecords();
+</script>
+
+</body>
+</html>
