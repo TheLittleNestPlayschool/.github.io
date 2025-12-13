@@ -313,7 +313,8 @@ document.getElementById('add-form').onsubmit=async e=>{
     admin_type_id:admin_type_id.value,
     franchise_id:franchise_id.value,
     user_id:user_id.value,
-    daily_pay:daily_pay.value
+    daily_pay:daily_pay.value,
+    is_active:true
   };
 
   await fetch(teacherAPI,{
