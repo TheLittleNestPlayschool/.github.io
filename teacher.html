@@ -95,4 +95,244 @@ th,td{
 
 th{background:#e8ffff;}
 
-.re
+.record-line-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:6px;
+}
+
+.record-field label{
+  font-size:12px;
+  margin-bottom:6px
+}
+
+.actions{text-align:center;}
+.actions button{
+  display:block;
+  width:84px;
+  margin:6px auto;
+}
+
+.pagination{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  margin-top:12px;
+  flex-wrap:wrap
+}
+
+.page-btn{
+  padding:6px 10px;
+  border:1px solid #ccc;
+  background:#74e8e8;
+  border-radius:4px
+}
+.page-btn.active{
+  background:#498787;
+  color:#fff;
+}
+
+.compact{font-size:13px}
+
+@media (max-width:1200px){
+  .record-line-grid{grid-template-columns:repeat(2,1fr)}
+  form .record-line{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<form id="add-form" autocomplete="off">
+  <div class="record-line">
+    <div class="record-field"><label>First Name</label><input id="first_name" required></div>
+    <div class="record-field"><label>Last Name</label><input id="last_name" required></div>
+    <div class="record-field"><label>Email</label><input id="email"></div>
+    <div class="record-field"><label>Phone</label><input id="phone"></div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field"><label>Admin Type ID</label><input id="admin_type_id"></div>
+
+    <div class="record-field">
+      <label>Franchise</label>
+      <select id="franchise_id"></select>
+    </div>
+
+    <div class="record-field"><label>User ID</label><input id="user_id"></div>
+    <div class="record-field"><label>Daily Pay</label><input id="daily_pay"></div>
+  </div>
+
+  <button type="submit" style="width:160px;">Add Teacher</button>
+</form>
+
+<div class="controls">
+  <input id="searchInput" placeholder="Search teacher..." />
+  <label>Records per page:
+    <select id="pageSizeSelect">
+      <option value="5">5</option>
+      <option value="10" selected>10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+  </label>
+  <button id="printBtn" class="compact">Print</button>
+</div>
+
+<div id="tableWrapper">
+<table>
+<thead>
+<tr>
+  <th style="width:48px">ID</th>
+  <th>All Fields</th>
+  <th style="width:110px">Actions</th>
+</tr>
+</thead>
+<tbody id="table-body"></tbody>
+</table>
+</div>
+
+<div class="pagination" id="pagination"></div>
+
+<script>
+const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:xLIeVP2e/teacher";
+const franchiseApi="https://x8ki-letl-twmt.n7.xano.io/api:mXEfdJlg/franchise";
+
+let PAGE_SIZE=10, allRecords=[], filteredRecords=[], currentPage=1;
+let franchises=[];
+
+/* -------- FRANCHISE LOOKUP -------- */
+async function fetchFranchises(){
+  const res=await fetch(franchiseApi);
+  const data=await res.json();
+  franchises = Array.isArray(data) ? data : (data.items || []);
+
+  const sel=document.getElementById('franchise_id');
+  sel.innerHTML='<option value="">Select Franchise</option>';
+
+  franchises.forEach(f=>{
+    const o=document.createElement('option');
+    o.value=f.id;
+    o.textContent=f.name || `Franchise ${f.id}`;
+    sel.appendChild(o);
+  });
+}
+
+/* -------- TEACHERS -------- */
+async function fetchAllRecords(){
+  const res=await fetch(apiBase);
+  const data=await res.json();
+  allRecords=Array.isArray(data)?data:(data.items||[]);
+  filteredRecords=allRecords.slice();
+  renderPage();
+}
+
+function renderPage(){
+  const tbody=document.getElementById('table-body');
+  tbody.innerHTML='';
+  let start=(currentPage-1)*PAGE_SIZE;
+  let end=Math.min(start+PAGE_SIZE,filteredRecords.length);
+
+  for(let i=start;i<end;i++){
+    const r=filteredRecords[i];
+    const tr=document.createElement('tr');
+
+    tr.innerHTML=`
+<td>${r.id}</td>
+<td>
+  <div class="record-line-grid">
+    <div class="record-field"><label>First Name</label><input data-field="first_name" value="${r.first_name||''}" disabled></div>
+    <div class="record-field"><label>Last Name</label><input data-field="last_name" value="${r.last_name||''}" disabled></div>
+    <div class="record-field"><label>Email</label><input data-field="email" value="${r.email||''}" disabled></div>
+    <div class="record-field"><label>Phone</label><input data-field="phone" value="${r.phone||''}" disabled></div>
+
+    <div class="record-field">
+      <label>Franchise</label>
+      <select data-field="franchise_id" disabled>
+        ${franchises.map(f=>`
+          <option value="${f.id}" ${String(f.id)===String(r.franchise_id)?'selected':''}>
+            ${f.name || `Franchise ${f.id}`}
+          </option>
+        `).join('')}
+      </select>
+    </div>
+  </div>
+</td>
+<td class="actions">
+  <button onclick="editRow(this,${r.id})">Edit</button>
+  <button onclick="deleteRow(${r.id})">Delete</button>
+</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+/* -------- EDIT / DELETE -------- */
+async function editRow(btn,id){
+  const tr=btn.closest('tr');
+  const fields=tr.querySelectorAll('input,select');
+
+  if(btn.textContent==='Edit'){
+    fields.forEach(f=>f.disabled=false);
+    btn.textContent='Save';
+    return;
+  }
+
+  const payload={};
+  fields.forEach(f=>{
+    if(f.dataset.field){
+      payload[f.dataset.field]=f.value;
+      f.disabled=true;
+    }
+  });
+
+  await fetch(`${apiBase}/${id}`,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+
+  btn.textContent='Edit';
+  fetchAllRecords();
+}
+
+async function deleteRow(id){
+  if(!confirm('Delete this teacher?'))return;
+  await fetch(`${apiBase}/${id}`,{method:'DELETE'});
+  fetchAllRecords();
+}
+
+/* -------- ADD -------- */
+document.getElementById('add-form').onsubmit=async e=>{
+  e.preventDefault();
+  const payload={
+    first_name:first_name.value,
+    last_name:last_name.value,
+    email:email.value,
+    phone:phone.value,
+    admin_type_id:admin_type_id.value,
+    franchise_id:franchise_id.value,
+    user_id:user_id.value,
+    daily_pay:daily_pay.value
+  };
+
+  await fetch(apiBase,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+
+  e.target.reset();
+  fetchAllRecords();
+};
+
+/* -------- LOAD ORDER -------- */
+(async()=>{
+  await fetchFranchises();
+  await fetchAllRecords();
+})();
+</script>
+
+</body>
+</html>
