@@ -145,7 +145,6 @@ th{background:#e8ffff;}
 <body>
 
 <form id="add-form" autocomplete="off">
-
   <div class="record-line">
     <div class="record-field"><label>First Name</label><input id="first_name" required></div>
     <div class="record-field"><label>Last Name</label><input id="last_name" required></div>
@@ -174,7 +173,6 @@ th{background:#e8ffff;}
       <option value="100">100</option>
     </select>
   </label>
-  <button id="printBtn" class="compact">Print</button>
 </div>
 
 <div id="tableWrapper">
@@ -190,15 +188,12 @@ th{background:#e8ffff;}
 </table>
 </div>
 
-<div class="pagination" id="pagination"></div>
-
 <script>
 const teacherAPI="https://x8ki-letl-twmt.n7.xano.io/api:xLIeVP2e/teacher";
 const adminTypeAPI="https://x8ki-letl-twmt.n7.xano.io/api:UpJO_5WB/admin_type";
 const franchiseAPI="https://x8ki-letl-twmt.n7.xano.io/api:mXEfdJlg/franchise";
 
-let PAGE_SIZE=10, allRecords=[], filteredRecords=[], currentPage=1;
-let adminTypes=[], franchises=[];
+let adminTypes=[], franchises=[], allRecords=[];
 
 async function loadLookups(){
   adminTypes=await (await fetch(adminTypeAPI)).json();
@@ -217,76 +212,67 @@ async function loadLookups(){
 
 async function fetchAllRecords(){
   const res=await fetch(teacherAPI);
-  const data=await res.json();
-  allRecords=Array.isArray(data)?data:data.items||[];
-  filteredRecords=allRecords.slice();
-  renderPage();
+  allRecords=await res.json();
+  render();
 }
 
-function renderPage(){
+function render(){
   const tbody=document.getElementById('table-body');
   tbody.innerHTML='';
-  let start=(currentPage-1)*PAGE_SIZE;
-  let end=Math.min(start+PAGE_SIZE,filteredRecords.length);
-
-  for(let i=start;i<end;i++){
-    const r=filteredRecords[i];
-    const tr=document.createElement('tr');
-
-    tr.innerHTML=`
+  allRecords.forEach(r=>{
+    tbody.innerHTML+=`
+<tr>
 <td>${r.id}</td>
 <td>
-  <div class="record-line-grid">
-    <div class="record-field"><label>First Name</label><input data-field="first_name" value="${r.first_name||''}" disabled></div>
-    <div class="record-field"><label>Last Name</label><input data-field="last_name" value="${r.last_name||''}" disabled></div>
-    <div class="record-field"><label>Email</label><input data-field="email" value="${r.email||''}" disabled></div>
-    <div class="record-field"><label>Phone</label><input data-field="phone" value="${r.phone||''}" disabled></div>
+<div class="record-line-grid">
+<div class="record-field"><label>First Name</label><input data-field="first_name" value="${r.first_name||''}" disabled></div>
+<div class="record-field"><label>Last Name</label><input data-field="last_name" value="${r.last_name||''}" disabled></div>
+<div class="record-field"><label>Email</label><input data-field="email" value="${r.email||''}" disabled></div>
+<div class="record-field"><label>Phone</label><input data-field="phone" value="${r.phone||''}" disabled></div>
 
-    <div class="record-field">
-      <label>Admin Type</label>
-      <select data-field="admin_type_id" disabled>
-        ${adminTypes.map(a=>`<option value="${a.id}" ${a.id==r.admin_type_id?'selected':''}>${a.Admin_Type}</option>`).join('')}
-      </select>
-    </div>
+<div class="record-field">
+<label>Admin Type</label>
+<select data-field="admin_type_id" disabled>
+${adminTypes.map(a=>`<option value="${a.id}" ${a.id==r.admin_type_id?'selected':''}>${a.Admin_Type}</option>`).join('')}
+</select>
+</div>
 
-    <div class="record-field">
-      <label>Franchise</label>
-      <select data-field="franchise_id" disabled>
-        ${franchises.map(f=>`<option value="${f.id}" ${f.id==r.franchise_id?'selected':''}>${f.name}</option>`).join('')}
-      </select>
-    </div>
+<div class="record-field">
+<label>Franchise</label>
+<select data-field="franchise_id" disabled>
+${franchises.map(f=>`<option value="${f.id}" ${f.id==r.franchise_id?'selected':''}>${f.name}</option>`).join('')}
+</select>
+</div>
 
-    <div class="record-field"><label>User ID</label><input data-field="user_id" value="${r.user_id||''}" disabled></div>
-    <div class="record-field"><label>Daily Pay</label><input data-field="daily_pay" value="${r.daily_pay||''}" disabled></div>
-  </div>
+<div class="record-field"><label>User ID</label><input data-field="user_id" value="${r.user_id||''}" disabled></div>
+<div class="record-field"><label>Daily Pay</label><input data-field="daily_pay" value="${r.daily_pay||''}" disabled></div>
+</div>
 </td>
 <td class="actions">
-  <button onclick="editRow(this,${r.id})">Edit</button>
-  <button onclick="deleteRow(${r.id})">Delete</button>
-</td>`;
-    tbody.appendChild(tr);
-  }
+<button onclick="editRow(this,${r.id})">Edit</button>
+<button onclick="deleteRow(${r.id})">Delete</button>
+</td>
+</tr>`;
+  });
 }
 
 async function editRow(btn,id){
-  const tr=btn.closest('tr');
-  const inputs=tr.querySelectorAll('input,select');
+  const row=btn.closest('tr');
+  const fields=row.querySelectorAll('input,select');
 
   if(btn.textContent==='Edit'){
-    inputs.forEach(i=>i.disabled=false);
+    fields.forEach(f=>f.disabled=false);
     btn.textContent='Save';
     return;
   }
 
   const payload={};
-  inputs.forEach(i=>{
-    if(i.dataset.field){
-      payload[i.dataset.field]=
-        i.tagName==='SELECT'
-          ? parseInt(i.value)
-          : (i.value==='' ? null : i.value);
-      i.disabled=true;
-    }
+  fields.forEach(f=>{
+    if(!f.dataset.field)return;
+    if(f.value==='')return;
+    payload[f.dataset.field]=
+      f.tagName==='SELECT' ? parseInt(f.value) : f.value;
+    f.disabled=true;
   });
 
   await fetch(`${teacherAPI}/${id}`,{
@@ -311,14 +297,15 @@ document.getElementById('add-form').onsubmit=async e=>{
   const payload={
     first_name:first_name.value,
     last_name:last_name.value,
-    email:email.value || null,
-    phone:phone.value || null,
     admin_type_id:parseInt(admin_type_id.value),
     franchise_id:parseInt(franchise_id.value),
-    user_id:user_id.value ? parseInt(user_id.value) : null,
-    daily_pay:daily_pay.value ? parseFloat(daily_pay.value) : null,
     is_active:true
   };
+
+  if(email.value) payload.email=email.value;
+  if(phone.value) payload.phone=phone.value;
+  if(user_id.value) payload.user_id=parseInt(user_id.value);
+  if(daily_pay.value) payload.daily_pay=parseFloat(daily_pay.value);
 
   await fetch(teacherAPI,{
     method:'POST',
@@ -335,5 +322,6 @@ document.getElementById('add-form').onsubmit=async e=>{
   await fetchAllRecords();
 })();
 </script>
+
 </body>
 </html>
