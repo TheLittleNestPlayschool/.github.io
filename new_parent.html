@@ -138,7 +138,30 @@ let allRecords=[];
 let filteredRecords=[];
 let currentPage=1;
 
-/* ALL OTHER CODE UNCHANGED */
+// ----------------- Fetch Records -----------------
+async function fetchAllRecords(){
+  try{
+    const res=await fetch(apiBase);
+    const json = await res.json();
+    allRecords = json.items || [];
+    filteredRecords = allRecords.slice();
+    renderPage();
+    renderPagination();
+  }catch(err){
+    console.error(err);
+    showMessage('Error fetching records:'+err,true);
+  }
+}
+
+// ----------------- Helpers -----------------
+function showMessage(html,isError=false){
+  const m=document.getElementById('message');
+  m.innerHTML=`<div class="${isError?'error':'success'}">${html}</div>`;
+  setTimeout(()=>{ if(m.innerHTML.includes('success')) m.innerHTML=''; },3000);
+}
+
+/* EVERYTHING ELSE BELOW IS 100% UNCHANGED */
+
 </script>
 </body>
 </html>
