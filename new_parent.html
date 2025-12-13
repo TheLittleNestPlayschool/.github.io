@@ -7,7 +7,6 @@
 
 <style>
 :root{--max-width:1400px;--gap:10px;}
-
 body{
   font-family:Arial,Helvetica,sans-serif;
   margin:16px auto;
@@ -16,19 +15,8 @@ body{
   font-size:15px;
   background-color:#e8ffff;
 }
-
-/* ---------- Layout & Fields ---------- */
-form .record-line{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-bottom:10px
-}
-.record-field{
-  display:flex;
-  flex-direction:column
-}
-
+form .record-line{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+.record-field{display:flex;flex-direction:column}
 input,textarea,select{
   padding:8px;
   font-size:14px;
@@ -38,9 +26,6 @@ input,textarea,select{
   border-radius:4px;
   width:100%;
 }
-
-textarea{min-height:56px; resize:vertical}
-
 button{
   padding:8px 12px;
   font-size:14px;
@@ -48,34 +33,10 @@ button{
   border:none;
   border-radius:4px;
   cursor:pointer;
-  transition:0.2s;
 }
-button:hover{
-  background-color:#498787;
-  color:#fff;
-}
+button:hover{background-color:#498787;color:#fff}
 
-/* ---------- Controls ---------- */
-.controls{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-  margin:12px 0
-}
-.controls > *{min-width:120px}
-
-#searchInput{
-  flex:1;
-  min-width:220px;
-  padding:10px;
-  font-size:15px;
-  background-color:#ffeffb;
-  border:1px solid #ccc;
-  border-radius:4px
-}
-
-/* ---------- Table ---------- */
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
 #tableWrapper{
   max-height:600px;
   overflow-y:auto;
@@ -84,141 +45,66 @@ button:hover{
   border-radius:6px;
   background:#e8ffff;
 }
-
 table{
   width:100%;
   border-collapse:collapse;
   table-layout:fixed;
-  background:#e8ffff;
 }
-
 th,td{
   border:1px solid #e6e6e6;
   padding:8px;
   vertical-align:top;
   font-size:13px;
-  overflow:hidden; /* FIX: prevents bleed into Actions */
+  overflow:hidden;
 }
-
-th{background:#e8ffff;}
-
 .record-line-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:10px;
-  margin-bottom:6px;
   max-width:100%;
 }
-
-.record-field label{
-  font-size:12px;
-  color:#333;
-  margin-bottom:6px
-}
-
-/* ---------- Actions ---------- */
 .actions{
   text-align:center;
 }
 .actions button{
   display:block;
-  width:84px;
+  width:90px;
   margin:6px auto;
-  padding:6px;
-  max-width:90px;
 }
 
-/* ---------- Pagination ---------- */
-.pagination{
-  display:flex;
-  gap:6px;
-  align-items:center;
-  justify-content:center;
-  margin-top:12px;
-  flex-wrap:wrap
-}
-
-.page-btn{
-  padding:6px 10px;
-  border:1px solid #ccc;
-  background:#74e8e8;
-  color:#000;
-  cursor:pointer;
-  border-radius:4px
-}
-.page-btn.active{
-  background:#498787;
-  color:#fff;
-  border-color:#498787
-}
-
-.compact{font-size:13px}
-
-@media (max-width:1200px){
-  .record-line-grid{grid-template-columns:repeat(2,1fr)}
-  form .record-line{grid-template-columns:repeat(2,1fr)}
+#debugBox{
+  background:#111;
+  color:#b5f5b5;
+  padding:10px;
+  border-radius:6px;
+  font-family:monospace;
+  font-size:12px;
+  white-space:pre-wrap;
+  max-height:160px;
+  overflow:auto;
+  margin-top:12px
 }
 </style>
 </head>
 
 <body>
 
-<!-- Add Parent Form -->
-<form id="add-form" autocomplete="off">
+<form id="add-form">
   <div class="record-line">
-    <div class="record-field"><label>First Name</label><input type="text" id="first_name" required></div>
-    <div class="record-field"><label>Last Name</label><input type="text" id="last_name" required></div>
-    <div class="record-field"><label>Email</label><input type="email" id="email"></div>
-    <div class="record-field"><label>Phone</label><input type="text" id="phone"></div>
+    <div class="record-field"><label>First Name</label><input id="first_name" required></div>
+    <div class="record-field"><label>Last Name</label><input id="last_name"></div>
+    <div class="record-field"><label>Email</label><input id="email"></div>
+    <div class="record-field"><label>Phone</label><input id="phone"></div>
   </div>
-
-  <div class="record-line">
-    <div class="record-field"><label>Address</label><input type="text" id="address"></div>
-    <div class="record-field"><label>User ID</label><input type="number" id="user_id"></div>
-    <div class="record-field"><label>Last Class Attended</label><input type="date" id="last_class_attended_date"></div>
-    <div class="record-field">
-      <label>Active?</label>
-      <select id="is_active">
-        <option selected>Yes</option>
-        <option>No</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="record-line">
-    <div class="record-field">
-      <label>Inactivation Comments</label>
-      <input type="text" id="inactivation_reason_comments">
-    </div>
-  </div>
-
-  <button type="submit" style="width:160px;">Add Parent</button>
+  <button type="submit">Add Parent</button>
 </form>
 
-<div id="message" style="min-height:22px;margin-bottom:6px"></div>
+<div id="message"></div>
 
-<!-- Controls -->
-<div class="controls">
-  <input id="searchInput" placeholder="Search name, phone, email..." />
-  <label>
-    Records per page:
-    <select id="pageSizeSelect">
-      <option value="5">5</option>
-      <option value="10" selected>10</option>
-      <option value="20">20</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
-    </select>
-  </label>
-  <button id="printBtn" class="compact">Print</button>
-</div>
-
-<!-- Table -->
 <div id="tableWrapper">
-<table id="records-table">
+<table>
 <thead>
 <tr>
-  <th style="width:48px">ID</th>
   <th>All Fields</th>
   <th style="width:110px">Actions</th>
 </tr>
@@ -227,168 +113,110 @@ th{background:#e8ffff;}
 </table>
 </div>
 
-<div class="pagination" id="pagination"></div>
+<div id="debugBox"></div>
 
 <script>
-const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N/parent";
-let PAGE_SIZE=10;
-let allRecords=[];
-let filteredRecords=[];
-let currentPage=1;
+const API_BASE="https://x8ki-letl-twmt.n7.xano.io/api:iEHfqd-N";
+const parentApi=API_BASE+"/parent";
 
-/* ---------- Fetch ---------- */
-async function fetchAllRecords(){
-  const res=await fetch(apiBase);
-  const data=await res.json();
-  allRecords = Array.isArray(data) ? data : data.items || [];
-  filteredRecords = allRecords.slice();
-  renderPage();
-  renderPagination();
+let allRecords=[];
+
+function dbg(...a){
+  const d=document.getElementById('debugBox');
+  d.textContent+=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):x).join(' ')+"\n";
 }
 
-/* ---------- Render ---------- */
-function renderPage(){
-  const tbody=document.getElementById('table-body');
-  tbody.innerHTML='';
-  let start=(currentPage-1)*PAGE_SIZE;
-  let end=Math.min(start+PAGE_SIZE,filteredRecords.length);
+function normalize(j){
+  if(Array.isArray(j)) return j;
+  if(j?.data) return j.data;
+  return [];
+}
 
-  for(let i=start;i<end;i++){
-    const r=filteredRecords[i];
+async function load(){
+  const r=await fetch(parentApi,{cache:'no-store'});
+  const t=await r.text();
+  const j=JSON.parse(t);
+  allRecords=normalize(j);
+  render();
+}
+
+function render(){
+  const tb=document.getElementById('table-body');
+  tb.innerHTML='';
+  allRecords.forEach(r=>{
     const tr=document.createElement('tr');
 
-    tr.innerHTML=`
-      <td>${r.id}</td>
-      <td>
-        <div class="record-line-grid">
-          <div class="record-field"><label>First Name</label><input data-field="first_name" value="${r.first_name||''}" disabled></div>
-          <div class="record-field"><label>Last Name</label><input data-field="last_name" value="${r.last_name||''}" disabled></div>
-          <div class="record-field"><label>Email</label><input data-field="email" value="${r.email||''}" disabled></div>
-          <div class="record-field"><label>Phone</label><input data-field="phone" value="${r.phone||''}" disabled></div>
-        </div>
-        <div class="record-line-grid">
-          <div class="record-field"><label>Address</label><input data-field="address" value="${r.address||''}" disabled></div>
-          <div class="record-field"><label>User ID</label><input type="number" data-field="user_id" value="${r.user_id||''}" disabled></div>
-          <div class="record-field"><label>Last Class</label><input type="date" data-field="last_class_attended_date" value="${r.last_class_attended_date||''}" disabled></div>
-          <div class="record-field">
-            <label>Active?</label>
-            <select data-field="is_active" disabled>
-              <option ${r.is_active?'selected':''}>Yes</option>
-              <option ${!r.is_active?'selected':''}>No</option>
-            </select>
-          </div>
-        </div>
-        <div class="record-line-grid">
-          <div class="record-field">
-            <label>Inactivation Comments</label>
-            <input data-field="inactivation_reason_comments" value="${r.inactivation_reason_comments||''}" disabled>
-          </div>
-        </div>
-      </td>
-      <td class="actions" style="width:110px">
-        <button onclick="editRow(this,${r.id})">Edit</button>
-        <button onclick="deleteRow(${r.id})">Delete</button>
-      </td>
+    const td=document.createElement('td');
+    td.innerHTML=`
+      <div class="record-line-grid">
+        <div class="record-field"><label>First</label><input data-f="first_name" value="${r.first_name||''}"></div>
+        <div class="record-field"><label>Last</label><input data-f="last_name" value="${r.last_name||''}"></div>
+        <div class="record-field"><label>Email</label><input data-f="email" value="${r.email||''}"></div>
+        <div class="record-field"><label>Phone</label><input data-f="phone" value="${r.phone||''}"></div>
+      </div>
     `;
-    tbody.appendChild(tr);
-  }
+    tr.appendChild(td);
+
+    const ta=document.createElement('td');
+    ta.className='actions';
+    ta.style.width='110px';
+
+    const eb=document.createElement('button');
+    eb.textContent='Edit';
+    eb.onclick=()=>edit(tr,r.id,eb);
+    ta.appendChild(eb);
+
+    const db=document.createElement('button');
+    db.textContent='Delete';
+    db.onclick=()=>del(r.id);
+    ta.appendChild(db);
+
+    tr.appendChild(ta);
+    tb.appendChild(tr);
+  });
 }
 
-/* ---------- Edit ---------- */
-async function editRow(btn,id){
-  const tr=btn.closest('tr');
-  const inputs=tr.querySelectorAll('input,select');
-
+async function edit(tr,id,btn){
   if(btn.textContent==='Edit'){
-    inputs.forEach(i=>i.disabled=false);
     btn.textContent='Save';
     return;
   }
-
-  const payload={};
-  inputs.forEach(i=>{
-    if(i.dataset.field){
-      payload[i.dataset.field]=
-        i.dataset.field==='is_active' ? i.value==='Yes' : i.value||null;
-      i.disabled=true;
-    }
-  });
-
-  await fetch(`${apiBase}/${id}`,{
+  const p={};
+  tr.querySelectorAll('[data-f]').forEach(i=>p[i.dataset.f]=i.value||null);
+  await fetch(parentApi+'/'+id,{
     method:'PATCH',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload)
+    body:JSON.stringify(p)
   });
-
   btn.textContent='Edit';
-  fetchAllRecords();
+  load();
 }
 
-/* ---------- Delete ---------- */
-async function deleteRow(id){
-  if(!confirm('Delete this parent?')) return;
-  await fetch(`${apiBase}/${id}`,{method:'DELETE'});
-  fetchAllRecords();
+async function del(id){
+  if(!confirm('Delete?')) return;
+  await fetch(parentApi+'/'+id,{method:'DELETE'});
+  load();
 }
 
-/* ---------- Pagination ---------- */
-document.getElementById('pageSizeSelect').onchange=e=>{
-  PAGE_SIZE=parseInt(e.target.value);
-  currentPage=1;
-  renderPage();
-  renderPagination();
-};
-
-document.getElementById('searchInput').oninput=()=>{
-  const v=searchInput.value.toLowerCase();
-  filteredRecords=allRecords.filter(r=>
-    ((r.first_name||'')+(r.last_name||'')+(r.phone||'')+(r.email||''))
-    .toLowerCase().includes(v)
-  );
-  currentPage=1;
-  renderPage();
-  renderPagination();
-};
-
-function renderPagination(){
-  const p=document.getElementById('pagination');
-  p.innerHTML='';
-  const pages=Math.ceil(filteredRecords.length/PAGE_SIZE);
-  for(let i=1;i<=pages;i++){
-    const b=document.createElement('button');
-    b.textContent=i;
-    b.className='page-btn'+(i===currentPage?' active':'');
-    b.onclick=()=>{currentPage=i;renderPage();renderPagination()};
-    p.appendChild(b);
-  }
-}
-
-/* ---------- Add ---------- */
 document.getElementById('add-form').onsubmit=async e=>{
   e.preventDefault();
-  const payload={
+  const p={
     first_name:first_name.value,
     last_name:last_name.value,
     email:email.value,
-    phone:phone.value,
-    address:address.value,
-    user_id:parseInt(user_id.value)||null,
-    last_class_attended_date:last_class_attended_date.value||null,
-    is_active:is_active.value==='Yes',
-    inactivation_reason_comments:inactivation_reason_comments.value||''
+    phone:phone.value
   };
-
-  await fetch(apiBase,{
+  await fetch(parentApi,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload)
+    body:JSON.stringify(p)
   });
-
   e.target.reset();
-  fetchAllRecords();
+  load();
 };
 
-fetchAllRecords();
+load();
 </script>
+
 </body>
 </html>
