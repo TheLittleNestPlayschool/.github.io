@@ -1,169 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Our Blog</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
 <style>
-  .gallery-section {
-    background: #fff0f5; /* Light contrast to the main blue */
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 4px;
-    border: 1px dashed #ccc;
-  }
-  .gallery-grid {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-  }
-  .gallery-item {
-    width: 80px;
-    text-align: center;
-    font-size: 10px;
-    position: relative;
-  }
-  .gallery-item img {
-    width: 100%;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-  }
-  .del-img {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: red;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    font-size: 10px;
-  }
-  .add-img-btn {
-    background-color: #498787;
-    color: white;
-    padding: 4px 8px;
-    font-size: 11px;
-    margin-top: 5px;
-  }
+:root{--max-width:1400px;--gap:20px;}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  margin:16px auto;
+  padding:18px;
+  max-width:var(--max-width);
+  font-size:15px;
+  background-color:#e8ffff; /* Your brand background */
+  color: #333;
+}
+
+/* ---------- Blog Grid ---------- */
+#blog-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--gap);
+  margin-top: 20px;
+}
+
+.blog-card {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+}
+
+.blog-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.featured-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background-color: #ffeffb; /* Your brand input color as placeholder */
+}
+
+.card-content {
+  padding: 15px;
+  flex-grow: 1;
+}
+
+.category-tag {
+  display: inline-block;
+  background: #74e8e8; /* Your brand button color */
+  padding: 4px 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.blog-title {
+  font-size: 20px;
+  margin: 0 0 10px 0;
+  color: #498787; /* Your brand hover color */
+}
+
+.blog-summary {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.read-more {
+  text-decoration: none;
+  font-weight: bold;
+  color: #498787;
+  font-size: 13px;
+}
+
+/* ---------- Tracking Status ---------- */
+#visitor-log-status {
+  font-size: 12px;
+  text-align: right;
+  color: #498787;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+  #blog-container { grid-template-columns: 1fr; }
+}
 </style>
+</head>
+
+<body>
+
+<div id="visitor-log-status">Tracking active...</div>
+<h1>Our Latest Stories</h1>
+
+<div id="blog-container">
+  <p>Loading the latest stories...</p>
+</div>
 
 <script>
-// ... existing variables ...
-const imgApi = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_image";
+const apiPosts = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_post";
+const apiAnalytics = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_analytics";
 
-function renderPage() {
-  const tbody = document.getElementById('table-body');
-  tbody.innerHTML = '';
-  let start = (currentPage - 1) * PAGE_SIZE;
-  let end = Math.min(start + PAGE_SIZE, filteredRecords.length);
+/* ---------- 1. Fetch and Display Posts ---------- */
+async function loadBlog() {
+  try {
+    const res = await fetch(apiPosts);
+    const posts = await res.json();
+    const container = document.getElementById('blog-container');
+    container.innerHTML = '';
 
-  for (let i = start; i < end; i++) {
-    const r = filteredRecords[i];
-    const tr = document.createElement('tr');
-    
-    // Add a unique ID to the gallery container so we can target it later
-    const galleryId = `gallery-${r.id}`;
+    // Only show published posts
+    const publishedPosts = posts.filter(p => p.is_published === true);
 
-    tr.innerHTML = `
-      <td>${r.id}</td>
-      <td>
-        <div class="record-line-grid">
-          <div class="record-field"><label>Title</label><input data-field="title" value="${r.title || ''}" disabled></div>
-          <div class="record-field"><label>Slug</label><input data-field="slug" value="${r.slug || ''}" disabled></div>
-          <div class="record-field"><label>Category ID</label><input type="number" data-field="blog_category_id" value="${r.blog_category_id || ''}" disabled></div>
-          <div class="record-field">
-            <label>Status</label>
-            <select data-field="is_published" disabled>
-              <option value="true" ${r.is_published ? 'selected' : ''}>Published</option>
-              <option value="false" ${!r.is_published ? 'selected' : ''}>Draft</option>
-            </select>
-          </div>
+    publishedPosts.forEach(post => {
+      const card = document.createElement('div');
+      card.className = 'blog-card';
+      
+      // Use featured image or a placeholder
+      const imgUrl = post.featured_image_url || 'https://via.placeholder.com/400x200?text=No+Image';
+      
+      card.innerHTML = `
+        <img src="${imgUrl}" class="featured-image" alt="${post.title}">
+        <div class="card-content">
+          <span class="category-tag">Category ${post.blog_category_id}</span>
+          <h2 class="blog-title">${post.title}</h2>
+          <p class="blog-summary">${truncateText(post.content, 120)}</p>
+          <a href="/post.html?slug=${post.slug}" class="read-more">Read Full Story →</a>
         </div>
-        
-        <div class="record-field">
-            <label>Body Content</label>
-            <textarea data-field="content" disabled>${r.content || ''}</textarea>
-        </div>
-
-        <div class="gallery-section">
-          <strong>Post Gallery</strong>
-          <div class="gallery-grid" id="${galleryId}">
-             <span style="color:gray">Loading images...</span>
-          </div>
-          
-          <div style="margin-top:10px; display:flex; gap:5px;">
-             <input type="text" id="new-img-url-${r.id}" placeholder="Image URL" style="flex:2">
-             <input type="text" id="new-img-alt-${r.id}" placeholder="Alt Text" style="flex:1">
-             <button class="add-img-btn" onclick="addImage(${r.id})">+ Add Image</button>
-          </div>
-        </div>
-      </td>
-      <td class="actions">
-        <button onclick="editRow(this,${r.id})">Edit Post</button>
-        <button onclick="deleteRow(${r.id})">Delete</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-    
-    // Immediately fetch the images for this specific post
-    loadGallery(r.id, galleryId);
+      `;
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error("Failed to load blog:", err);
   }
 }
 
-/* ---------- GALLERY LOGIC ---------- */
-
-// 1. Load images for a specific post
-async function loadGallery(postId, containerId) {
-  const res = await fetch(`${imgApi}?blog_post_id=${postId}`);
-  const images = await res.json();
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
-
-  if (images.length === 0) {
-    container.innerHTML = '<span style="color:gray">No images in gallery.</span>';
-    return;
-  }
-
-  images.forEach(img => {
-    const item = document.createElement('div');
-    item.className = 'gallery-item';
-    item.innerHTML = `
-      <img src="${img.image_url}" alt="${img.alt_text}">
-      <button class="del-img" onclick="deleteImage(${img.id}, ${postId}, '${containerId}')">×</button>
-    `;
-    container.appendChild(item);
-  });
-}
-
-// 2. Add a new image to a post
-async function addImage(postId) {
-  const urlInput = document.getElementById(`new-img-url-${postId}`);
-  const altInput = document.getElementById(`new-img-alt-${postId}`);
-  
-  if (!urlInput.value) return alert("Please provide an image URL");
-
+/* ---------- 2. Logic to Log Visitor (The tracking part) ---------- */
+async function logVisit() {
   const payload = {
-    blog_post_id: postId,
-    image_url: urlInput.value,
-    alt_text: altInput.value || "Blog Image",
-    created_at: Date.now()
+    created_at: Date.now(),
+    ip_address: "Logged by Browser", // Xano can capture actual IP on the backend
+    user_agent: navigator.userAgent,
+    referrer: document.referrer || "Direct",
+    blog_post_id: null // On a list page, this is null
   };
 
-  await fetch(imgApi, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-
-  urlInput.value = '';
-  altInput.value = '';
-  loadGallery(postId, `gallery-${postId}`); // Refresh just the gallery
+  try {
+    await fetch(apiAnalytics, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    console.log("Analytics error:", e);
+  }
 }
 
-// 3. Delete an image
-async function deleteImage(imageId, postId, containerId) {
-  if (!confirm("Delete this image?")) return;
-  await fetch(`${imgApi}/${imageId}`, { method: 'DELETE' });
-  loadGallery(postId, containerId); // Refresh
+/* ---------- Helper Functions ---------- */
+function truncateText(text, length) {
+  if (!text) return "";
+  return text.length > length ? text.substring(0, length) + "..." : text;
 }
+
+// Initializing
+loadBlog();
+logVisit();
 </script>
+</body>
+</html>
