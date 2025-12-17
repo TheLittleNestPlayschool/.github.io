@@ -1,1 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Session Manager</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<style>
+:root{--max-width:1400px;--gap:10px;}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  margin:16px auto;
+  padding:18px;
+  max-width:var(--max-width);
+  font-size:15px;
+  background-color:#e8ffff;
+}
+
+form .record-line{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:10px
+}
+.record-field{
+  display:flex;
+  flex-direction:column
+}
+
+input,textarea,select{
+  padding:8px;
+  font-size:14px;
+  box-sizing:border-box;
+  background-color:#ffeffb;
+  border:1px solid #ccc;
+  border-radius:4px;
+  width:100%;
+}
+
+textarea{min-height:56px; resize:vertical}
+
+button{
+  padding:8px 12px;
+  font-size:14px;
+  background-color:#74e8e8;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+}
+button:hover{
+  background-color:#498787;
+  color:#fff;
+}
+
+.controls{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin:12px 0
+}
+.controls > *{min-width:120px}
+
+#searchInput{
+  flex:1;
+  min-width:220px;
+  padding:10px;
+  font-size:15px;
+  background-color:#ffeffb;
+  border:1px solid #ccc;
+  border-radius:4px
+}
+
+#tableWrapper{
+  max-height:600px;
+  overflow-y:auto;
+  border:1px solid #ddd;
+  padding:8px;
+  border-radius:6px;
+  background:#e8ffff;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  background:#e8ffff;
+}
+
+th,td{
+  border:1px solid #e6e6e6;
+  padding:8px;
+  vertical-align:top;
+  font-size:13px;
+}
+
+th{background:#e8ffff;}
+
+.record-line-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:6px;
+}
+
+.record-field label{
+  font-size:12px;
+  margin-bottom:6px
+}
+
+.actions{text-align:center;}
+.actions button{
+  display:block;
+  width:84px;
+  margin:6px auto;
+}
+
+.pagination{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  margin-top:12px;
+  flex-wrap:wrap
+}
+
+.page-btn{
+  padding:6px 10px;
+  border:1px solid #ccc;
+  background:#74e8e8;
+  border-radius:4px
+}
+.page-btn.active{
+  background:#498787;
+  color:#fff;
+}
+
+.compact{font-size:13px}
+
+@media (max-width:1200px){
+  .record-line-grid{grid-template-columns:repeat(2,1fr)}
+  form .record-line{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<form id="add-form" autocomplete="off">
+  <div class="record-line">
+    <div class="record-field"><label>Session Name</label><input id="name" required></div>
+    <div class="record-field"><label>Franchise ID</label><input type="number" id="franchise_id"></div>
+    <div class="record-field"><label>Primary Teacher ID</label><input type="number" id="primary_teacher_id"></div>
+    <div class="record-field"><label>Max Students</label><input type="number" id="max_students"></div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field"><label>Start Time</label><input id="start_time_text"></div>
+    <div class="record-field"><label>End Time</label><input id="end_time_text"></div>
+    <div class="record-field"><label>Scheduled Days</label>
+      <select id="scheduled_days" multiple>
+        <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+        <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+      </select>
+    </div>
+    <div class="record-field"><label>Active</label>
+      <select id="is_active"><option value="true">Yes</option><option value="false">No</option></select>
+    </div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field"><label>Description</label><textarea id="description"></textarea></div>
+  </div>
+
+  <button type="submit" style="width:160px;">Add Session</button>
+</form>
+
+<div class="controls">
+  <input id="searchInput" placeholder="Search session name..." />
+</div>
+
+<div id="tableWrapper">
+<table>
+<thead>
+<tr>
+  <th style="width:48px">ID</th>
+  <th>All Fields</th>
+  <th style="width:110px">Actions</th>
+</tr>
+</thead>
+<tbody id="table-body"></tbody>
+</table>
+</div>
+
+<script>
+const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:mUsV7Zqx/session";
+let allRecords=[];
+
+async function fetchAllRecords(){
+  const res=await fetch(apiBase);
+  const data=await res.json();
+  allRecords=Array.isArray(data)?data:data.items||[];
+  render();
+}
+
+function render(){
+  const tbody=document.getElementById('table-body');
+  tbody.innerHTML='';
+  allRecords.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+<td>${r.id}</td>
+<td>
+  <div class="record-line-grid">
+    <div class="record-field"><label>Name</label><input data-field="name" value="${r.name||''}" disabled></div>
+    <div class="record-field"><label>Start</label><input data-field="start_time_text" value="${r.start_time_text||''}" disabled></div>
+    <div class="record-field"><label>End</label><input data-field="end_time_text" value="${r.end_time_text||''}" disabled></div>
+    <div class="record-field"><label>Max</label><input data-field="max_students" value="${r.max_students||''}" disabled></div>
+  </div>
+</td>
+<td class="actions">
+  <button onclick="editRow(this,${r.id})">Edit</button>
+  <button onclick="deleteRow(${r.id})">Delete</button>
+</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function editRow(btn,id){
+  const tr=btn.closest('tr');
+  const inputs=tr.querySelectorAll('input');
+  if(btn.textContent==='Edit'){
+    inputs.forEach(i=>i.disabled=false);
+    btn.textContent='Save';
+    return;
+  }
+  const payload={};
+  inputs.forEach(i=>payload[i.dataset.field]=i.value||null);
+  await fetch(`${apiBase}/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  btn.textContent='Edit';
+  fetchAllRecords();
+}
+
+async function deleteRow(id){
+  if(!confirm('Delete this session?'))return;
+  await fetch(`${apiBase}/${id}`,{method:'DELETE'});
+  fetchAllRecords();
+}
+
+document.getElementById('add-form').onsubmit=async e=>{
+  e.preventDefault();
+  const payload={
+    name:name.value,
+    franchise_id:parseInt(franchise_id.value)||null,
+    primary_teacher_id:parseInt(primary_teacher_id.value)||null,
+    max_students:parseInt(max_students.value)||null,
+    start_time_text:start_time_text.value,
+    end_time_text:end_time_text.value,
+    scheduled_days:Array.from(scheduled_days.selectedOptions).map(o=>o.value),
+    description:description.value,
+    is_active:is_active.value==='true'
+  };
+  await fetch(apiBase,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  e.target.reset();
+  fetchAllRecords();
+};
+
+fetchAllRecords();
+</script>
+</body>
+</html>
 
