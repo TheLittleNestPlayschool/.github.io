@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Blog Content Manager</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
+<style>
+/* Keeping your exact brand styles */
+:root{--max-width:1400px;--gap:10px;}
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  margin:16px auto;
+  padding:18px;
+  max-width:var(--max-width);
+  font-size:15px;
+  background-color:#e8ffff;
+}
+form .record-line{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:10px
+}
+.record-field{display:flex; flex-direction:column}
+input,textarea,select{
+  padding:8px;
+  font-size:14px;
+  box-sizing:border-box;
+  background-color:#ffeffb;
+  border:1px solid #ccc;
+  border-radius:4px;
+  width:100%;
+}
+textarea{min-height:80px; resize:vertical}
+button{
+  padding:8px 12px;
+  font-size:14px;
+  background-color:#74e8e8;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  transition:0.2s;
+}
+button:hover{background-color:#498787; color:#fff;}
+.controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:12px 0}
+#searchInput{flex:1; min-width:220px; padding:10px; background-color:#ffeffb; border:1px solid #ccc; border-radius:4px}
+#tableWrapper{max-height:600px; overflow-y:auto; border:1px solid #ddd; padding:8px; border-radius:6px; background:#e8ffff;}
+table{width:100%; border-collapse:collapse; table-layout:fixed; background:#e8ffff;}
+th,td{border:1px solid #e6e6e6; padding:8px; vertical-align:top; font-size:13px; overflow:hidden;}
+.record-line-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:6px; max-width:100%;}
+.record-field label{font-size:12px; color:#333; margin-bottom:6px}
+.actions button{display:block; width:84px; margin:6px auto; padding:6px;}
+.pagination{display:flex; gap:6px; align-items:center; justify-content:center; margin-top:12px;}
+.page-btn{padding:6px 10px; border:1px solid #ccc; background:#74e8e8; cursor:pointer; border-radius:4px}
+.page-btn.active{background:#498787; color:#fff;}
+
+@media (max-width:1200px){
+  .record-line-grid{grid-template-columns:repeat(2,1fr)}
+  form .record-line{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<h2>New Blog Post</h2>
+<form id="add-form" autocomplete="off">
+  <div class="record-line">
+    <div class="record-field"><label>Post Title</label><input type="text" id="title" required></div>
+    <div class="record-field"><label>URL Slug (e.g. my-first-post)</label><input type="text" id="slug" required></div>
+    <div class="record-field"><label>Category ID</label><input type="number" id="blog_category_id"></div>
+    <div class="record-field"><label>Author User ID</label><input type="number" id="author_user_id"></div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field" style="grid-column: span 2;"><label>Featured Image URL</label><input type="text" id="featured_image_url"></div>
+    <div class="record-field">
+        <label>Status</label>
+        <select id="is_published">
+          <option value="true">Published</option>
+          <option value="false" selected>Draft</option>
+        </select>
+    </div>
+    <div class="record-field"><label>Publish Date</label><input type="date" id="published_at"></div>
+  </div>
+
+  <div class="record-line">
+    <div class="record-field" style="grid-column: span 4;">
+      <label>Content (Body Text)</label>
+      <textarea id="content"></textarea>
+    </div>
+  </div>
+
+  <button type="submit" style="width:160px;">Create Post</button>
+</form>
+
+<div id="message" style="min-height:22px;margin-bottom:6px"></div>
+
+<div class="controls">
+  <input id="searchInput" placeholder="Search titles, content, or slugs..." />
+  <label>Records: 
+    <select id="pageSizeSelect">
+      <option value="10" selected>10</option>
+      <option value="50">50</option>
+    </select>
+  </label>
+</div>
+
+<div id="tableWrapper">
+<table id="records-table">
+<thead>
+<tr>
+  <th style="width:48px">ID</th>
+  <th>Post Details</th>
+  <th style="width:110px">Actions</th>
+</tr>
+</thead>
+<tbody id="table-body"></tbody>
+</table>
+</div>
+
+<div class="pagination" id="pagination"></div>
+
+<script>
+// Updated to your specific Xano Blog Post endpoint
+const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_post";
+let PAGE_SIZE=10;
+let allRecords=[];
+let filteredRecords=[];
+let currentPage=1;
+
+async function fetchAllRecords(){
+  const res=await fetch(apiBase);
+  const data=await res.json();
+  allRecords = Array.isArray(data) ? data : data.items || [];
+  filteredRecords = allRecords.slice();
+  renderPage();
+  renderPagination();
+}
+
+function renderPage(){
+  const tbody=document.getElementById('table-body');
+  tbody.innerHTML='';
+  let start=(currentPage-1)*PAGE_SIZE;
+  let end=Math.min(start+PAGE_SIZE,filteredRecords.length);
+
+  for(let i=start;i<end;i++){
+    const r=filteredRecords[i];
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${r.id}</td>
+      <td>
+        <div class="record-line-grid">
+          <div class="record-field"><label>Title</label><input data-field="title" value="${r.title||''}" disabled></div>
+          <div class="record-field"><label>Slug</label><input data-field="slug" value="${r.slug||''}" disabled></div>
+          <div class="record-field"><label>Category ID</label><input type="number" data-field="blog_category_id" value="${r.blog_category_id||''}" disabled></div>
+          <div class="record-field">
+            <label>Status</label>
+            <select data-field="is_published" disabled>
+              <option value="true" ${r.is_published?'selected':''}>Published</option>
+              <option value="false" ${!r.is_published?'selected':''}>Draft</option>
+            </select>
+          </div>
+        </div>
+        <div class="record-field">
+            <label>Content Preview</label>
+            <textarea data-field="content" disabled>${r.content||''}</textarea>
+        </div>
+      </td>
+      <td class="actions">
+        <button onclick="editRow(this,${r.id})">Edit</button>
+        <button onclick="deleteRow(${r.id})">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function editRow(btn,id){
+  const tr=btn.closest('tr');
+  const inputs=tr.querySelectorAll('input,select,textarea');
+  if(btn.textContent==='Edit'){
+    inputs.forEach(i=>i.disabled=false);
+    btn.textContent='Save';
+    return;
+  }
+  const payload={};
+  inputs.forEach(i=>{
+    if(i.dataset.field){
+      let val = i.value;
+      if(i.dataset.field === 'is_published') val = (i.value === 'true');
+      if(i.type === 'number') val = parseInt(i.value);
+      payload[i.dataset.field]= val;
+      i.disabled=true;
+    }
+  });
+  await fetch(`${apiBase}/${id}`,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  btn.textContent='Edit';
+  fetchAllRecords();
+}
+
+async function deleteRow(id){
+  if(!confirm('Delete this post?')) return;
+  await fetch(`${apiBase}/${id}`,{method:'DELETE'});
+  fetchAllRecords();
+}
+
+document.getElementById('add-form').onsubmit=async e=>{
+  e.preventDefault();
+  const payload={
+    title: document.getElementById('title').value,
+    slug: document.getElementById('slug').value,
+    content: document.getElementById('content').value,
+    blog_category_id: parseInt(document.getElementById('blog_category_id').value),
+    author_user_id: parseInt(document.getElementById('author_user_id').value),
+    is_published: document.getElementById('is_published').value === 'true',
+    featured_image_url: document.getElementById('featured_image_url').value,
+    published_at: Date.parse(document.getElementById('published_at').value) || Date.now()
+  };
+  await fetch(apiBase,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  });
+  e.target.reset();
+  fetchAllRecords();
+};
+
+// ... (Search and Pagination logic remains same as your original file) ...
+document.getElementById('searchInput').oninput=()=>{
+  const v=document.getElementById('searchInput').value.toLowerCase();
+  filteredRecords=allRecords.filter(r=>
+    ((r.title||'')+(r.content||'')+(r.slug||'')).toLowerCase().includes(v)
+  );
+  currentPage=1;
+  renderPage();
+  renderPagination();
+};
+
+function renderPagination(){
+  const p=document.getElementById('pagination');
+  p.innerHTML='';
+  const pages=Math.ceil(filteredRecords.length/PAGE_SIZE);
+  for(let i=1;i<=pages;i++){
+    const b=document.createElement('button');
+    b.textContent=i;
+    b.className='page-btn'+(i===currentPage?' active':'');
+    b.onclick=()=>{currentPage=i;renderPage();renderPagination()};
+    p.appendChild(b);
+  }
+}
+
+fetchAllRecords();
+</script>
+</body>
+</html>
