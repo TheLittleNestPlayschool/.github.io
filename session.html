@@ -60,8 +60,6 @@ button:hover{
   flex-wrap:wrap;
   margin:12px 0
 }
-.controls > *{min-width:120px}
-
 #searchInput{
   flex:1;
   min-width:220px;
@@ -99,14 +97,16 @@ th{background:#e8ffff;}
 
 .record-line-grid{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(5,1fr); /* Increased to fit Franchise */
   gap:10px;
   margin-bottom:6px;
 }
 
 .record-field label{
-  font-size:12px;
-  margin-bottom:6px
+  font-size:11px;
+  font-weight: bold;
+  margin-bottom:4px;
+  color: #555;
 }
 
 .actions{text-align:center;}
@@ -115,27 +115,6 @@ th{background:#e8ffff;}
   width:84px;
   margin:6px auto;
 }
-
-.pagination{
-  display:flex;
-  gap:6px;
-  justify-content:center;
-  margin-top:12px;
-  flex-wrap:wrap
-}
-
-.page-btn{
-  padding:6px 10px;
-  border:1px solid #ccc;
-  background:#74e8e8;
-  border-radius:4px
-}
-.page-btn.active{
-  background:#498787;
-  color:#fff;
-}
-
-.compact{font-size:13px}
 
 @media (max-width:1200px){
   .record-line-grid{grid-template-columns:repeat(2,1fr)}
@@ -149,21 +128,21 @@ th{background:#e8ffff;}
 <form id="add-form" autocomplete="off">
   <div class="record-line">
     <div class="record-field"><label>Session Name</label><input id="name" required></div>
-    <div class="record-field"><label>Franchise ID</label><input type="number" id="franchise_id"></div>
+    <div class="record-field"><label>Franchise</label><select id="franchise_id_select" required><option value="">Loading...</option></select></div>
     <div class="record-field"><label>Primary Teacher ID</label><input type="number" id="primary_teacher_id"></div>
     <div class="record-field"><label>Max Students</label><input type="number" id="max_students"></div>
   </div>
 
   <div class="record-line">
-    <div class="record-field"><label>Start Time</label><input id="start_time_text"></div>
-    <div class="record-field"><label>End Time</label><input id="end_time_text"></div>
+    <div class="record-field"><label>Start Time</label><input id="start_time_text" placeholder="e.g. 09:00 AM"></div>
+    <div class="record-field"><label>End Time</label><input id="end_time_text" placeholder="e.g. 10:00 AM"></div>
     <div class="record-field"><label>Scheduled Days</label>
       <select id="scheduled_days" multiple>
         <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
         <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
       </select>
     </div>
-    <div class="record-field"><label>Active</label>
+    <div class="record-field"><label>Active Status</label>
       <select id="is_active"><option value="true">Yes</option><option value="false">No</option></select>
     </div>
   </div>
@@ -176,7 +155,7 @@ th{background:#e8ffff;}
 </form>
 
 <div class="controls">
-  <input id="searchInput" placeholder="Search session name..." />
+  <input id="searchInput" placeholder="Search session name..." onkeyup="filterTable()" />
 </div>
 
 <div id="tableWrapper">
@@ -184,7 +163,7 @@ th{background:#e8ffff;}
 <thead>
 <tr>
   <th style="width:48px">ID</th>
-  <th>All Fields</th>
+  <th>Session Details</th>
   <th style="width:110px">Actions</th>
 </tr>
 </thead>
@@ -193,80 +172,132 @@ th{background:#e8ffff;}
 </div>
 
 <script>
-const apiBase="https://x8ki-letl-twmt.n7.xano.io/api:mUsV7Zqx/session";
-let allRecords=[];
+const apiBase = "https://x8ki-letl-twmt.n7.xano.io/api:mUsV7Zqx/session";
+const franchiseApi = "https://x8ki-letl-twmt.n7.xano.io/api:mUsV7Zqx/franchise";
+
+let allRecords = [];
+let franchises = [];
+
+// Fetch Franchises first to populate selects
+async function initializeData(){
+  try {
+    const res = await fetch(franchiseApi);
+    const data = await res.json();
+    franchises = Array.isArray(data) ? data : data.items || [];
+    
+    // Populate the form dropdown
+    const select = document.getElementById('franchise_id_select');
+    select.innerHTML = '<option value="">Select Franchise</option>';
+    franchises.forEach(f => {
+      select.innerHTML += `<option value="${f.id}">${f.name}</option>`;
+    });
+    
+    await fetchAllRecords();
+  } catch(e) { console.error("Initialization failed", e); }
+}
 
 async function fetchAllRecords(){
-  const res=await fetch(apiBase);
-  const data=await res.json();
-  allRecords=Array.isArray(data)?data:data.items||[];
+  const res = await fetch(apiBase);
+  const data = await res.json();
+  allRecords = Array.isArray(data) ? data : data.items || [];
   render();
 }
 
 function render(){
-  const tbody=document.getElementById('table-body');
-  tbody.innerHTML='';
-  allRecords.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-<td>${r.id}</td>
-<td>
-  <div class="record-line-grid">
-    <div class="record-field"><label>Name</label><input data-field="name" value="${r.name||''}" disabled></div>
-    <div class="record-field"><label>Start</label><input data-field="start_time_text" value="${r.start_time_text||''}" disabled></div>
-    <div class="record-field"><label>End</label><input data-field="end_time_text" value="${r.end_time_text||''}" disabled></div>
-    <div class="record-field"><label>Max</label><input data-field="max_students" value="${r.max_students||''}" disabled></div>
-  </div>
-</td>
-<td class="actions">
-  <button onclick="editRow(this,${r.id})">Edit</button>
-  <button onclick="deleteRow(${r.id})">Delete</button>
-</td>`;
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  allRecords.forEach(r => {
+    // Find the franchise name for display
+    const franchiseName = franchises.find(f => f.id === r.franchise_id)?.name || 'Unknown';
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.id}</td>
+      <td>
+        <div class="record-line-grid">
+          <div class="record-field"><label>Name</label><input data-field="name" value="${r.name||''}" disabled></div>
+          <div class="record-field"><label>Franchise</label>
+            <select data-field="franchise_id" disabled>
+              ${franchises.map(f => `<option value="${f.id}" ${f.id === r.franchise_id ? 'selected' : ''}>${f.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="record-field"><label>Start</label><input data-field="start_time_text" value="${r.start_time_text||''}" disabled></div>
+          <div class="record-field"><label>End</label><input data-field="end_time_text" value="${r.end_time_text||''}" disabled></div>
+          <div class="record-field"><label>Max Students</label><input type="number" data-field="max_students" value="${r.max_students||''}" disabled></div>
+        </div>
+      </td>
+      <td class="actions">
+        <button onclick="editRow(this,${r.id})">Edit</button>
+        <button onclick="deleteRow(${r.id})">Delete</button>
+      </td>`;
     tbody.appendChild(tr);
   });
 }
 
-async function editRow(btn,id){
-  const tr=btn.closest('tr');
-  const inputs=tr.querySelectorAll('input');
-  if(btn.textContent==='Edit'){
-    inputs.forEach(i=>i.disabled=false);
-    btn.textContent='Save';
+async function editRow(btn, id){
+  const tr = btn.closest('tr');
+  const inputs = tr.querySelectorAll('input, select');
+  if(btn.textContent === 'Edit'){
+    inputs.forEach(i => i.disabled = false);
+    btn.textContent = 'Save';
     return;
   }
-  const payload={};
-  inputs.forEach(i=>payload[i.dataset.field]=i.value||null);
-  await fetch(`${apiBase}/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  btn.textContent='Edit';
+  const payload = {};
+  inputs.forEach(i => {
+    const val = i.value;
+    payload[i.dataset.field] = (i.type === 'number' || i.dataset.field === 'franchise_id') ? parseInt(val) : val;
+  });
+  
+  await fetch(`${apiBase}/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  
+  btn.textContent = 'Edit';
   fetchAllRecords();
 }
 
 async function deleteRow(id){
-  if(!confirm('Delete this session?'))return;
-  await fetch(`${apiBase}/${id}`,{method:'DELETE'});
+  if(!confirm('Delete this session?')) return;
+  await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
   fetchAllRecords();
 }
 
-document.getElementById('add-form').onsubmit=async e=>{
+function filterTable() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const rows = document.querySelectorAll('#table-body tr');
+  rows.forEach(row => {
+    const text = row.innerText.toLowerCase();
+    row.style.display = text.includes(query) ? '' : 'none';
+  });
+}
+
+document.getElementById('add-form').onsubmit = async e => {
   e.preventDefault();
-  const payload={
-    name:name.value,
-    franchise_id:parseInt(franchise_id.value)||null,
-    primary_teacher_id:parseInt(primary_teacher_id.value)||null,
-    max_students:parseInt(max_students.value)||null,
-    start_time_text:start_time_text.value,
-    end_time_text:end_time_text.value,
-    scheduled_days:Array.from(scheduled_days.selectedOptions).map(o=>o.value),
-    description:description.value,
-    is_active:is_active.value==='true'
+  const payload = {
+    name: document.getElementById('name').value,
+    franchise_id: parseInt(document.getElementById('franchise_id_select').value),
+    primary_teacher_id: parseInt(document.getElementById('primary_teacher_id').value) || null,
+    max_students: parseInt(document.getElementById('max_students').value) || null,
+    start_time_text: document.getElementById('start_time_text').value,
+    end_time_text: document.getElementById('end_time_text').value,
+    scheduled_days: Array.from(document.getElementById('scheduled_days').selectedOptions).map(o => o.value),
+    description: document.getElementById('description').value,
+    is_active: document.getElementById('is_active').value === 'true'
   };
-  await fetch(apiBase,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  
+  await fetch(apiBase, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  
   e.target.reset();
   fetchAllRecords();
 };
 
-fetchAllRecords();
+initializeData();
 </script>
 </body>
 </html>
-
