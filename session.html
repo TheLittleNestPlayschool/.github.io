@@ -2,208 +2,157 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Session Manager - Integrated</title>
+<title>Session Manager</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 
 <style>
-:root{--max-width:1400px;--bg-main:#e8ffff;--bg-input:#ffeffb;--accent:#74e8e8;--accent-hover:#498787;}
+:root{--bg:#e8ffff;--input:#ffeffb;--accent:#74e8e8;--dark:#498787;}
 
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  margin:16px auto;
-  padding:18px;
-  max-width:var(--max-width);
-  font-size:15px;
-  background-color:var(--bg-main);
-}
+body{font-family:Arial,sans-serif; margin:16px auto; padding:18px; max-width:1400px; background-color:var(--bg);}
 
-form .record-line{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-bottom:10px
-}
+h2{color: #333; border-bottom: 2px solid var(--accent); padding-bottom: 8px;}
+
+form .record-line{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:10px}
 .record-field{display:flex; flex-direction:column}
+label{font-size:11px; font-weight:bold; margin-bottom:4px; color:#555;}
 
-input,textarea,select{
-  padding:8px;
-  font-size:14px;
-  box-sizing:border-box;
-  background-color:var(--bg-input);
-  border:1px solid #ccc;
-  border-radius:4px;
-  width:100%;
-}
-
+input,textarea,select{padding:8px; border:1px solid #ccc; border-radius:4px; background-color:var(--input); width:100%; box-sizing:border-box;}
 textarea{min-height:56px; resize:vertical}
 
-button{
-  padding:8px 12px;
-  font-size:14px;
-  background-color:var(--accent);
-  border:none;
-  border-radius:4px;
-  cursor:pointer;
-}
-button:hover{background-color:var(--accent-hover); color:#fff;}
+button{padding:8px 12px; background-color:var(--accent); border:none; border-radius:4px; cursor:pointer; font-weight: bold;}
+button:hover{background-color:var(--dark); color:#fff;}
 
-.controls{margin:12px 0}
-#searchInput{
-  width: 100%;
-  padding:12px;
-  font-size:15px;
-  background-color:var(--bg-input);
-  border:1px solid #ccc;
-  border-radius:4px
-}
+#searchInput{width:100%; padding:12px; margin:20px 0 10px 0; border:1px solid #ccc; border-radius:4px; background:var(--input); font-size: 15px;}
 
-#tableWrapper{
-  max-height:600px;
-  overflow-y:auto;
-  border:1px solid #ddd;
-  padding:8px;
-  border-radius:6px;
-  background:white;
-}
-
+#tableWrapper{max-height:600px; overflow-y:auto; border:1px solid #ddd; border-radius:6px; background:white; padding:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
 table{width:100%; border-collapse:collapse; table-layout:fixed;}
-th,td{border:1px solid #eee; padding:10px; vertical-align:top; font-size:13px; text-align:left;}
-th{background:#f9f9f9; position: sticky; top: 0;}
+th,td{border:1px solid #eee; padding:10px; font-size:13px; text-align:left; vertical-align:top;}
+th{background:#f9f9f9; position:sticky; top:0; z-index: 10;}
 
-.record-line-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
-  gap:10px;
-}
-
-.record-field label{font-size:11px; font-weight:bold; margin-bottom:4px; color:#666;}
-
+.grid-inner{display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px;}
 .actions button{display:block; width:100%; margin:4px 0;}
 
-@media (max-width:1000px){
-  form .record-line{grid-template-columns:repeat(2,1fr)}
-}
+@media (max-width:1000px){ form .record-line{grid-template-columns:repeat(2,1fr)} }
 </style>
 </head>
 
 <body>
 
-<h2>Add New Session</h2>
-<form id="add-form" autocomplete="off">
+<h2>Create New Session</h2>
+<form id="add-form">
   <div class="record-line">
     <div class="record-field"><label>Session Name</label><input id="name" required></div>
-    <div class="record-field"><label>Franchise</label>
-        <select id="franchise_id_select" required><option value="">Loading Franchises...</option></select>
-    </div>
-    <div class="record-field"><label>Teacher ID</label><input type="number" id="primary_teacher_id"></div>
+    <div class="record-field"><label>Franchise</label><select id="f_select" required><option value="">Loading...</option></select></div>
+    <div class="record-field"><label>Primary Teacher</label><select id="t_select" required><option value="">Loading...</option></select></div>
     <div class="record-field"><label>Max Students</label><input type="number" id="max_students"></div>
   </div>
 
   <div class="record-line">
-    <div class="record-field"><label>Start Time</label><input id="start_time_text" placeholder="09:00 AM"></div>
-    <div class="record-field"><label>End Time</label><input id="end_time_text" placeholder="10:00 AM"></div>
+    <div class="record-field"><label>Start Time</label><input id="start_time_text" placeholder="e.g. 10:00 AM"></div>
+    <div class="record-field"><label>End Time</label><input id="end_time_text" placeholder="e.g. 11:30 AM"></div>
     <div class="record-field"><label>Scheduled Days</label>
-      <select id="scheduled_days" multiple style="height: 80px;">
+      <select id="scheduled_days" multiple style="height:70px">
         <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
         <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
       </select>
     </div>
-    <div class="record-field"><label>Status</label>
-      <select id="is_active"><option value="true">Active</option><option value="false">Inactive</option></select>
+    <div class="record-field"><label>Is Active?</label>
+      <select id="is_active"><option value="true">Yes</option><option value="false">No</option></select>
     </div>
   </div>
 
-  <div class="record-line">
-    <div class="record-field" style="grid-column: span 4;"><label>Description</label><textarea id="description"></textarea></div>
-  </div>
-
-  <button type="submit" id="submitBtn">Create Session</button>
+  <button type="submit" id="submitBtn">Save Session</button>
 </form>
 
-<div class="controls">
-  <input id="searchInput" placeholder="Filter by session name, franchise, or teacher..." onkeyup="filterTable()" />
-</div>
+<input id="searchInput" placeholder="Quick search sessions, teachers, or franchises..." onkeyup="filterTable()">
 
 <div id="tableWrapper">
-<table>
-<thead>
-<tr>
-  <th style="width:60px">ID</th>
-  <th>Session Details</th>
-  <th style="width:100px">Actions</th>
-</tr>
-</thead>
-<tbody id="table-body"></tbody>
-</table>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:50px">ID</th>
+        <th>Session Details</th>
+        <th style="width:100px">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
 </div>
 
 <script>
-const apiBase = "https://x8ki-letl-twmt.n7.xano.io/api:mUsV7Zqx/session";
-const franchiseApi = "https://x8ki-letl-twmt.n7.xano.io/api:mUsV7Zqx/franchise"; // Inferred based on group ID
+// Verified Endpoints
+const sessionAPI = "https://x8ki-letl-twmt.n7.xano.io/api:mUsV7Zqx/session";
+const teacherAPI = "https://x8ki-letl-twmt.n7.xano.io/api:xLIeVP2e/teacher";
+const franchiseAPI = "https://x8ki-letl-twmt.n7.xano.io/api:mXEfdJlg/franchise";
 
-let allSessions = [];
-let allFranchises = [];
+let dataStore = { sessions: [], teachers: [], franchises: [] };
 
-// Initialize: Fetch Franchises then Sessions
+// Initial Load
 async function init() {
     try {
-        // 1. Fetch Franchises for the dropdowns
-        const fRes = await fetch(franchiseApi);
-        const fData = await fRes.json();
-        allFranchises = Array.isArray(fData) ? fData : (fData.items || []);
+        const [fRes, tRes] = await Promise.all([
+            fetch(franchiseAPI).then(r => r.json()),
+            fetch(teacherAPI).then(r => r.json())
+        ]);
         
-        populateFranchiseDropdown();
+        dataStore.franchises = Array.isArray(fRes) ? fRes : (fRes.items || []);
+        dataStore.teachers = Array.isArray(tRes) ? tRes : (tRes.items || []);
+
+        populateDropdown('f_select', dataStore.franchises, 'Franchise');
+        populateDropdown('t_select', dataStore.teachers, 'Teacher');
         
-        // 2. Fetch Sessions
         await fetchSessions();
-    } catch (err) {
-        console.error("Initialization Error:", err);
-        document.getElementById('franchise_id_select').innerHTML = '<option>Error loading data</option>';
+    } catch (err) { 
+        console.error("Initialization Error:", err); 
     }
 }
 
-function populateFranchiseDropdown() {
-    const select = document.getElementById('franchise_id_select');
-    select.innerHTML = '<option value="">-- Select Franchise --</option>';
-    allFranchises.forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f.id;
-        opt.textContent = f.name || `Franchise #${f.id}`;
-        select.appendChild(opt);
+function populateDropdown(id, list, label) {
+    const el = document.getElementById(id);
+    el.innerHTML = `<option value="">-- Select ${label} --</option>`;
+    list.forEach(item => {
+        const nameStr = item.name || item.first_name || `ID: ${item.id}`;
+        el.innerHTML += `<option value="${item.id}">${nameStr}</option>`;
     });
 }
 
 async function fetchSessions() {
-    const res = await fetch(apiBase);
+    const res = await fetch(sessionAPI);
     const data = await res.json();
-    allSessions = Array.isArray(data) ? data : (data.items || []);
+    dataStore.sessions = Array.isArray(data) ? data : (data.items || []);
     render();
 }
 
 function render() {
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = '';
-    
-    allSessions.forEach(s => {
+    dataStore.sessions.forEach(s => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${s.id}</td>
             <td>
-                <div class="record-line-grid">
-                    <div class="record-field"><label>Name</label><input data-field="name" value="${s.name || ''}" disabled></div>
+                <div class="grid-inner">
+                    <div class="record-field"><label>Name</label>
+                        <input data-field="name" value="${s.name||''}" disabled>
+                    </div>
                     <div class="record-field"><label>Franchise</label>
                         <select data-field="franchise_id" disabled>
-                            ${allFranchises.map(f => `<option value="${f.id}" ${f.id === s.franchise_id ? 'selected' : ''}>${f.name}</option>`).join('')}
+                            ${dataStore.franchises.map(f => `<option value="${f.id}" ${f.id == s.franchise_id ? 'selected' : ''}>${f.name || f.id}</option>`).join('')}
                         </select>
                     </div>
-                    <div class="record-field"><label>Start</label><input data-field="start_time_text" value="${s.start_time_text || ''}" disabled></div>
-                    <div class="record-field"><label>End</label><input data-field="end_time_text" value="${s.end_time_text || ''}" disabled></div>
-                    <div class="record-field"><label>Max</label><input type="number" data-field="max_students" value="${s.max_students || ''}" disabled></div>
+                    <div class="record-field"><label>Teacher</label>
+                        <select data-field="primary_teacher_id" disabled>
+                            ${dataStore.teachers.map(t => `<option value="${t.id}" ${t.id == s.primary_teacher_id ? 'selected' : ''}>${t.name || t.first_name || t.id}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="record-field"><label>Start Time</label>
+                        <input data-field="start_time_text" value="${s.start_time_text||''}" disabled>
+                    </div>
                 </div>
             </td>
             <td class="actions">
                 <button onclick="editRow(this, ${s.id})">Edit</button>
-                <button onclick="deleteRow(${s.id})" style="background:#ffcccc;">Del</button>
+                <button onclick="deleteRow(${s.id})" style="background:#ffcccc; color:#a00;">Delete</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -213,19 +162,21 @@ function render() {
 async function editRow(btn, id) {
     const tr = btn.closest('tr');
     const fields = tr.querySelectorAll('input, select');
-    
     if (btn.textContent === 'Edit') {
         fields.forEach(f => f.disabled = false);
         btn.textContent = 'Save';
-        btn.style.background = '#ffd700';
+        btn.style.background = '#498787';
+        btn.style.color = '#fff';
     } else {
         const payload = {};
         fields.forEach(f => {
-            const fieldName = f.dataset.field;
-            payload[fieldName] = (f.type === 'number' || fieldName === 'franchise_id') ? parseInt(f.value) : f.value;
+            const key = f.dataset.field;
+            if(key) {
+                payload[key] = (f.type === 'number' || key.endsWith('_id')) ? parseInt(f.value) : f.value;
+            }
         });
-
-        await fetch(`${apiBase}/${id}`, {
+        
+        await fetch(`${sessionAPI}/${id}`, {
             method: 'PATCH',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(payload)
@@ -233,51 +184,45 @@ async function editRow(btn, id) {
         
         btn.textContent = 'Edit';
         btn.style.background = '';
+        btn.style.color = '';
         fetchSessions();
     }
 }
 
 async function deleteRow(id) {
-    if (!confirm('Permanently delete this session?')) return;
-    await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
-    fetchSessions();
+    if (confirm('Are you sure you want to delete this session?')) {
+        await fetch(`${sessionAPI}/${id}`, { method: 'DELETE' });
+        fetchSessions();
+    }
 }
 
 function filterTable() {
     const val = document.getElementById('searchInput').value.toLowerCase();
-    const rows = document.querySelectorAll('#table-body tr');
-    rows.forEach(r => {
+    document.querySelectorAll('#table-body tr').forEach(r => {
         r.style.display = r.innerText.toLowerCase().includes(val) ? '' : 'none';
     });
 }
 
 document.getElementById('add-form').onsubmit = async (e) => {
     e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Saving...';
-
     const payload = {
         name: document.getElementById('name').value,
-        franchise_id: parseInt(document.getElementById('franchise_id_select').value),
-        primary_teacher_id: parseInt(document.getElementById('primary_teacher_id').value) || null,
+        franchise_id: parseInt(document.getElementById('f_select').value),
+        primary_teacher_id: parseInt(document.getElementById('t_select').value),
         max_students: parseInt(document.getElementById('max_students').value) || null,
         start_time_text: document.getElementById('start_time_text').value,
         end_time_text: document.getElementById('end_time_text').value,
         scheduled_days: Array.from(document.getElementById('scheduled_days').selectedOptions).map(o => o.value),
-        description: document.getElementById('description').value,
         is_active: document.getElementById('is_active').value === 'true'
     };
-
-    await fetch(apiBase, {
+    
+    await fetch(sessionAPI, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload)
     });
-
+    
     e.target.reset();
-    btn.disabled = false;
-    btn.textContent = 'Create Session';
     fetchSessions();
 };
 
