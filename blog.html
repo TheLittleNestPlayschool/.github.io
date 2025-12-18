@@ -64,7 +64,7 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
       </div>
       <div class="record-line">
         <div class="record-field" style="grid-column: span 2;">
-            <label>Featured Image (File Upload)</label>
+            <label>Featured Image (Saved to Gallery first)</label>
             <input type="file" id="post_f_img_file" accept="image/*">
         </div>
         <div class="record-field">
@@ -198,7 +198,7 @@ document.getElementById('add-category-form').onsubmit = async (e) => {
     e.target.reset(); fetchCategories();
 };
 
-/* ---------- Blog Post CRUD & Uploads ---------- */
+/* ---------- Blog Post CRUD & Normalized Upload Logic ---------- */
 async function initPosts() {
     await fetchCategories();
     const res = await fetch(apiPost);
@@ -207,25 +207,58 @@ async function initPosts() {
     renderPosts();
     setAuthorUI();
 }
+
 document.getElementById('add-post-form').onsubmit = async (e) => {
     e.preventDefault();
-    const fd = new FormData();
-    fd.append('title', post_title.value); fd.append('slug', post_slug_hidden.value); fd.append('content', post_content.value);
-    fd.append('blog_category_id', parseInt(post_category_select.value)); fd.append('author_name', currentUser.name);
-    fd.append('is_published', post_status.value==='true'); fd.append('created_at', Date.now());
+    let featured_image_id = null;
     const fileInput = document.getElementById('post_f_img_file');
-    if(fileInput.files[0]) fd.append('featured_image', fileInput.files[0]);
-    await fetch(apiPost, { method:'POST', body:fd });
-    e.target.reset(); initPosts();
+
+    // STEP 1: Upload Image to blog_image table first if it exists
+    if(fileInput.files[0]) {
+        const fdImg = new FormData();
+        fdImg.append('image', fileInput.files[0]);
+        fdImg.append('position', 0); // Position 0 denotes Featured
+        
+        const imgRes = await fetch(apiImg, { method:'POST', body:fdImg });
+        const imgData = await imgRes.json();
+        featured_image_id = imgData.id; // Store the ID for Step 2
+    }
+
+    // STEP 2: Create Blog Post with the Reference ID
+    const postPayload = {
+        title: post_title.value,
+        slug: post_slug_hidden.value,
+        content: post_content.value,
+        blog_category_id: parseInt(post_category_select.value),
+        author_name: currentUser.name,
+        is_published: post_status.value === 'true',
+        featured_image_id: featured_image_id, // Pointer to blog_image
+        created_at: Date.now()
+    };
+
+    await fetch(apiPost, { 
+        method:'POST', 
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(postPayload) 
+    });
+
+    e.target.reset(); 
+    initPosts();
 };
+
 async function uploadGallery(postId) {
     const fileInput = document.getElementById(`img-file-${postId}`);
     for(let f of fileInput.files) {
-        const fd = new FormData(); fd.append('blog_post_id', postId); fd.append('image', f);
+        const fd = new FormData(); 
+        fd.append('blog_post_id', postId); 
+        fd.append('image', f);
+        fd.append('position', 1); // Positions > 0 are gallery items
         await fetch(apiImg, { method:'POST', body:fd });
     }
-    fileInput.value=''; loadGallery(postId);
+    fileInput.value=''; 
+    loadGallery(postId);
 }
+
 async function deletePost(id) { if(confirm('Delete Post?')) { await fetch(`${apiPost}/${id}`, {method:'DELETE'}); initPosts(); } }
 async function deleteImg(imgId, postId) { await fetch(`${apiImg}/${imgId}`, {method:'DELETE'}); loadGallery(postId); }
 
@@ -259,13 +292,16 @@ function renderPosts() {
     }
     renderPagination();
 }
+
 async function editPost(btn, id) {
     const tr = btn.closest('tr'); const inputs = tr.querySelectorAll('input, select, textarea');
     if(btn.textContent === 'Edit Post') { inputs.forEach(i=>i.disabled=false); btn.textContent='Save'; return; }
-    const pld = {}; inputs.forEach(i=>{ if(i.dataset.post) pld[i.dataset.post] = i.dataset.post==='is_published'?(i.value==='true'):(i.dataset.post==='blog_category_id'?parseInt(i.value):i.value); });
+    const pld = {}; 
+    inputs.forEach(i=>{ if(i.dataset.post) pld[i.dataset.post] = i.dataset.post==='is_published'?(i.value==='true'):(i.dataset.post==='blog_category_id'?parseInt(i.value):i.value); });
     await fetch(`${apiPost}/${id}`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(pld)});
     btn.textContent='Edit Post'; initPosts();
 }
+
 async function loadGallery(postId) {
     const res = await fetch(`${apiImg}?blog_post_id=${postId}`);
     const imgs = await res.json();
