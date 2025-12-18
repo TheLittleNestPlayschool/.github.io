@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Blog Dashboard: Advanced Analytics</title>
+<title>Master Admin Dashboard</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-
 <style>
 :root{--max-width:1400px; --primary: #74e8e8; --secondary: #498787; --bg: #e8ffff; --input-bg: #ffeffb;}
 body{ font-family:Arial,Helvetica,sans-serif; margin:16px auto; padding:18px; max-width:var(--max-width); font-size:15px; background-color:var(--bg); }
@@ -47,11 +46,11 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
 
 <div id="posts" class="tab-content active">
     <h2>Create New Blog Post</h2>
-    <form id="add-post-form" autocomplete="off">
+    <form id="add-post-form">
       <div class="record-line">
         <div class="record-field" style="grid-column: span 2;">
             <label>Title</label>
-            <input type="text" id="post_title" placeholder="Enter post title..." required oninput="autoSlug('post_title', 'post_slug_hidden')">
+            <input type="text" id="post_title" required oninput="autoSlug('post_title', 'post_slug_hidden')">
             <input type="hidden" id="post_slug_hidden">
         </div>
         <div class="record-field">
@@ -64,7 +63,10 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
         </div>
       </div>
       <div class="record-line">
-        <div class="record-field" style="grid-column: span 2;"><label>Featured Image URL</label><input type="text" id="post_f_img"></div>
+        <div class="record-field" style="grid-column: span 2;">
+            <label>Featured Image (File Upload)</label>
+            <input type="file" id="post_f_img_file" accept="image/*">
+        </div>
         <div class="record-field">
           <label>Status</label>
           <select id="post_status">
@@ -81,15 +83,11 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
       <button type="submit" style="width:160px;">Add Post</button>
     </form>
 
-    <div style="margin: 20px 0;">
-        <input id="searchInput" placeholder="Search titles..." oninput="handleSearch()" />
-    </div>
+    <div style="margin: 20px 0;"><input id="searchInput" placeholder="Search titles..." oninput="handleSearch()" /></div>
 
     <div id="tableWrapper">
-        <table id="posts-table">
-            <thead>
-                <tr><th style="width:50px">ID</th><th>Post Details & Gallery</th><th style="width:120px">Actions</th></tr>
-            </thead>
+        <table>
+            <thead><tr><th style="width:50px">ID</th><th>Post Details & Gallery</th><th style="width:120px">Actions</th></tr></thead>
             <tbody id="posts-table-body"></tbody>
         </table>
     </div>
@@ -105,10 +103,7 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
                 <input type="text" id="cat_name" required oninput="autoSlug('cat_name', 'cat_slug_hidden')">
                 <input type="hidden" id="cat_slug_hidden">
             </div>
-            <div class="record-field">
-                <label>Status</label>
-                <select id="cat_is_active"><option value="true">Active</option><option value="false">Inactive</option></select>
-            </div>
+            <div class="record-field"><label>Status</label><select id="cat_is_active"><option value="true">Active</option><option value="false">Inactive</option></select></div>
             <div class="record-field"><label>&nbsp;</label><button type="submit">Add Category</button></div>
         </div>
         <div class="record-field"><label>Description</label><textarea id="cat_desc" style="min-height:40px"></textarea></div>
@@ -130,7 +125,7 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
                     <th style="width:120px">Views (Uniq/Tot)</th>
                     <th>Blog Post Title</th>
                     <th style="width:150px">Created At</th>
-                    <th>Source Breakdown (Referrers)</th>
+                    <th>Source Breakdown</th>
                 </tr>
             </thead>
             <tbody id="analytics-table-body"></tbody>
@@ -139,30 +134,23 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
 </div>
 
 <script>
-/* ---------- Auth & State ---------- */
-const rawUserData = localStorage.getItem('currentUser'); 
-const currentUser = rawUserData ? JSON.parse(rawUserData) : { name: "Dave Test 2", id: 1 };
-
+/* ---------- State & Endpoints ---------- */
 const apiPost = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_post";
 const apiImg = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_image";
 const apiCat = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_category";
 const apiAnalytics = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_analytics";
 
-let allPosts = [], categories = [], filteredPosts = [], currentPage = 1, PAGE_SIZE = 10;
+const rawUserData = localStorage.getItem('currentUser'); 
+const currentUser = rawUserData ? JSON.parse(rawUserData) : { name: "Dave Test 2", id: 1 };
 
-function setAuthorUI() {
-    const display = document.getElementById('post_author_display');
-    if(display) display.value = currentUser.name;
-}
+let allPosts = [], filteredPosts = [], categories = [], currentPage = 1, PAGE_SIZE = 10;
 
-/* ---------- Helper: Slug & Tabs ---------- */
-function generateSlug(text) {
-    return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+/* ---------- Core Helpers ---------- */
+function setAuthorUI() { document.getElementById('post_author_display').value = currentUser.name; }
+function autoSlug(src, target) { 
+    const val = document.getElementById(src).value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
+    document.getElementById(target).value = val;
 }
-function autoSlug(sourceId, targetId) {
-    document.getElementById(targetId).value = generateSlug(document.getElementById(sourceId).value);
-}
-
 function switchTab(e, tabId) {
     document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
@@ -172,14 +160,45 @@ function switchTab(e, tabId) {
     if(tabId === 'posts') initPosts();
 }
 
-/* ---------- Data Fetching ---------- */
+/* ---------- Category Management ---------- */
 async function fetchCategories() {
     const res = await fetch(apiCat);
     categories = await res.json();
     renderCategoryTable();
     document.getElementById('post_category_select').innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
 }
+function renderCategoryTable() {
+    document.getElementById('category-table-body').innerHTML = categories.map(c => `
+        <tr>
+            <td>${c.id}</td>
+            <td>
+                <div class="record-line-grid">
+                    <div class="record-field"><label>Name</label><input data-cat="name" value="${c.name}" disabled></div>
+                    <div class="record-field"><label>Slug</label><input data-cat="slug" value="${c.slug}" disabled></div>
+                    <div class="record-field"><label>Status</label><select data-cat="is_active" disabled><option value="true" ${c.is_active?'selected':''}>Active</option><option value="false" ${!c.is_active?'selected':''}>Inactive</option></select></div>
+                </div>
+                <textarea data-cat="description" disabled>${c.description||''}</textarea>
+            </td>
+            <td class="actions"><button onclick="editCat(this,${c.id})">Edit</button><button onclick="deleteCat(${c.id})" style="background:#ffb3b3">Delete</button></td>
+        </tr>`).join('');
+}
+async function editCat(btn, id) {
+    const tr = btn.closest('tr');
+    const inputs = tr.querySelectorAll('input, select, textarea');
+    if(btn.textContent === 'Edit') { inputs.forEach(i => i.disabled = false); btn.textContent = 'Save'; return; }
+    const payload = {}; inputs.forEach(i => { if(i.dataset.cat) payload[i.dataset.cat] = i.dataset.cat==='is_active'?(i.value==='true'):i.value; });
+    await fetch(`${apiCat}/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    btn.textContent = 'Edit'; fetchCategories();
+}
+async function deleteCat(id) { if(confirm('Delete Category?')) { await fetch(`${apiCat}/${id}`, {method:'DELETE'}); fetchCategories(); } }
+document.getElementById('add-category-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const p = { name:cat_name.value, slug:cat_slug_hidden.value, description:cat_desc.value, is_active:cat_is_active.value==='true', created_at:Date.now() };
+    await fetch(apiCat, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(p)});
+    e.target.reset(); fetchCategories();
+};
 
+/* ---------- Blog Post CRUD & Uploads ---------- */
 async function initPosts() {
     await fetchCategories();
     const res = await fetch(apiPost);
@@ -188,52 +207,32 @@ async function initPosts() {
     renderPosts();
     setAuthorUI();
 }
-
-/* ---------- Analytics Summary Logic ---------- */
-async function fetchAnalyticsSummary() {
-    const [postsRes, logsRes] = await Promise.all([fetch(apiPost), fetch(apiAnalytics)]);
-    const posts = await postsRes.json();
-    const logs = await logsRes.json();
-    
-    const tbody = document.getElementById('analytics-table-body');
-    tbody.innerHTML = '';
-
-    posts.forEach(post => {
-        const postLogs = logs.filter(l => l.blog_post_id === post.id);
-        
-        // Calculate Uniques vs Total
-        const totalHits = postLogs.length;
-        const uniqueIPs = new Set(postLogs.map(l => l.ip_address)).size;
-
-        // Group Referrers
-        const sources = {};
-        postLogs.forEach(l => {
-            const src = l.referrer && l.referrer !== "" ? l.referrer : "Direct/Search";
-            sources[src] = (sources[src] || 0) + 1;
-        });
-
-        const sourceHTML = Object.entries(sources)
-            .sort((a,b) => b[1] - a[1]) // Sort by highest hits
-            .map(([name, count]) => `<span class="source-tag"><b>${name}</b>: ${count}</span>`)
-            .join('');
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td style="text-align:center"><b>${uniqueIPs}</b> / ${totalHits}</td>
-            <td><strong>${post.title}</strong><br><small style="color:#666">ID: #${post.id}</small></td>
-            <td>${new Date(post.created_at).toLocaleDateString()}<br><small>${new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small></td>
-            <td>${sourceHTML || '<small>No traffic data yet</small>'}</td>
-        `;
-        tbody.appendChild(tr);
-    });
+document.getElementById('add-post-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData();
+    fd.append('title', post_title.value); fd.append('slug', post_slug_hidden.value); fd.append('content', post_content.value);
+    fd.append('blog_category_id', parseInt(post_category_select.value)); fd.append('author_name', currentUser.name);
+    fd.append('is_published', post_status.value==='true'); fd.append('created_at', Date.now());
+    const fileInput = document.getElementById('post_f_img_file');
+    if(fileInput.files[0]) fd.append('featured_image', fileInput.files[0]);
+    await fetch(apiPost, { method:'POST', body:fd });
+    e.target.reset(); initPosts();
+};
+async function uploadGallery(postId) {
+    const fileInput = document.getElementById(`img-file-${postId}`);
+    for(let f of fileInput.files) {
+        const fd = new FormData(); fd.append('blog_post_id', postId); fd.append('image', f);
+        await fetch(apiImg, { method:'POST', body:fd });
+    }
+    fileInput.value=''; loadGallery(postId);
 }
+async function deletePost(id) { if(confirm('Delete Post?')) { await fetch(`${apiPost}/${id}`, {method:'DELETE'}); initPosts(); } }
+async function deleteImg(imgId, postId) { await fetch(`${apiImg}/${imgId}`, {method:'DELETE'}); loadGallery(postId); }
 
-/* ---------- Standard Table Rendering (Posts & Categories) ---------- */
 function renderPosts() {
     const tbody = document.getElementById('posts-table-body');
     tbody.innerHTML = '';
-    let start = (currentPage-1) * PAGE_SIZE;
-    let end = Math.min(start + PAGE_SIZE, filteredPosts.length);
+    let start = (currentPage-1) * PAGE_SIZE, end = Math.min(start + PAGE_SIZE, filteredPosts.length);
     for(let i=start; i<end; i++) {
         const p = filteredPosts[i];
         const tr = document.createElement('tr');
@@ -242,98 +241,52 @@ function renderPosts() {
             <td>
                 <div class="record-line-grid">
                     <div class="record-field"><label>Title</label><input data-post="title" value="${p.title}" disabled></div>
-                    <div class="record-field"><label>Slug</label><input data-post="slug" value="${p.slug}" disabled></div>
-                    <div class="record-field"><label>Status</label>
-                        <select data-post="is_published" disabled>
-                            <option value="true" ${p.is_published?'selected':''}>Published</option>
-                            <option value="false" ${!p.is_published?'selected':''}>Draft</option>
-                        </select>
-                    </div>
-                    <div class="record-field"><label>Category</label>
-                        <select data-post="blog_category_id" disabled>
-                            ${categories.map(c => `<option value="${c.id}" ${c.id===p.blog_category_id?'selected':''}>${c.name}</option>`).join('')}
-                        </select>
-                    </div>
+                    <div class="record-field"><label>Category</label><select data-post="blog_category_id" disabled>${categories.map(c=>`<option value="${c.id}" ${c.id===p.blog_category_id?'selected':''}>${c.name}</option>`).join('')}</select></div>
+                    <div class="record-field"><label>Status</label><select data-post="is_published" disabled><option value="true" ${p.is_published?'selected':''}>Published</option><option value="false" ${!p.is_published?'selected':''}>Draft</option></select></div>
+                    <div class="record-field"><label>Author</label><input value="${p.author_name || 'System'}" disabled></div>
                 </div>
                 <textarea data-post="content" disabled>${p.content||''}</textarea>
-                <div style="font-size:11px; color:#777; margin-top:5px;">Author: ${p.author_name || 'System'} | Created: ${new Date(p.created_at).toLocaleString()}</div>
                 <div class="gallery-section">
-                    <div class="gallery-grid" id="gal-${p.id}">Loading...</div>
-                    <div style="margin-top:8px; display:flex; gap:5px;">
-                        <input type="text" id="img-url-${p.id}" placeholder="Image URL">
-                        <button onclick="addImg(${p.id})">Add</button>
+                    <div class="gallery-grid" id="gal-${p.id}">Loading Gallery...</div>
+                    <div style="margin-top:10px; display:flex; gap:10px;">
+                        <input type="file" id="img-file-${p.id}" multiple accept="image/*">
+                        <button onclick="uploadGallery(${p.id})">Upload Photos</button>
                     </div>
                 </div>
             </td>
-            <td class="actions">
-                <button onclick="editPost(this,${p.id})">Edit Post</button>
-                <button onclick="deletePost(${p.id})" style="background:#ffb3b3">Delete</button>
-            </td>`;
-        tbody.appendChild(tr);
-        loadGallery(p.id);
+            <td class="actions"><button onclick="editPost(this,${p.id})">Edit Post</button><button onclick="deletePost(${p.id})" style="background:#ffb3b3">Delete</button></td>`;
+        tbody.appendChild(tr); loadGallery(p.id);
     }
     renderPagination();
 }
-
-/* --- CRUD Actions (Add/Edit/Delete) remain functional --- */
-document.getElementById('add-post-form').onsubmit = async (e) => {
-    e.preventDefault();
-    const payload = {
-        title: post_title.value, slug: post_slug_hidden.value, content: post_content.value,
-        blog_category_id: parseInt(post_category_select.value),
-        author_name: currentUser.name, author_user_id: currentUser.id,
-        is_published: post_status.value === 'true', featured_image_url: post_f_img.value,
-        published_at: Date.parse(post_date.value) || Date.now(), created_at: Date.now()
-    };
-    await fetch(apiPost, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    e.target.reset(); initPosts();
-};
-
 async function editPost(btn, id) {
-    const tr = btn.closest('tr');
-    const inputs = tr.querySelectorAll('input, select, textarea');
-    if(btn.textContent === 'Edit Post') { inputs.forEach(i => i.disabled = false); btn.textContent = 'Save'; return; }
-    const payload = {}; let newTitle = "";
-    inputs.forEach(i => {
-        if(i.dataset.post) {
-            let val = i.value;
-            if(i.dataset.post === 'is_published') val = (val === 'true');
-            if(i.dataset.post === 'blog_category_id') val = parseInt(val);
-            if(i.dataset.post === 'title') newTitle = val;
-            payload[i.dataset.post] = val;
-            i.disabled = true;
-        }
-    });
-    if(newTitle) payload.slug = generateSlug(newTitle);
-    await fetch(`${apiPost}/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    btn.textContent = 'Edit Post'; initPosts();
+    const tr = btn.closest('tr'); const inputs = tr.querySelectorAll('input, select, textarea');
+    if(btn.textContent === 'Edit Post') { inputs.forEach(i=>i.disabled=false); btn.textContent='Save'; return; }
+    const pld = {}; inputs.forEach(i=>{ if(i.dataset.post) pld[i.dataset.post] = i.dataset.post==='is_published'?(i.value==='true'):(i.dataset.post==='blog_category_id'?parseInt(i.value):i.value); });
+    await fetch(`${apiPost}/${id}`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(pld)});
+    btn.textContent='Edit Post'; initPosts();
 }
-
-// Logic for Category rendering, Gallery, Search, and Pagination follows previous stable patterns...
-function renderCategoryTable() {
-    const tbody = document.getElementById('category-table-body');
-    tbody.innerHTML = categories.map(c => `
-        <tr><td>${c.id}</td><td><div class="record-line-grid"><div class="record-field"><label>Name</label><input data-cat="name" value="${c.name}" disabled></div><div class="record-field"><label>Slug</label><input data-cat="slug" value="${c.slug}" disabled></div><div class="record-field"><label>Status</label><select data-cat="is_active" disabled><option value="true" ${c.is_active?'selected':''}>Active</option><option value="false" ${!c.is_active?'selected':''}>Inactive</option></select></div></div><textarea data-cat="description" disabled>${c.description||''}</textarea></td><td class="actions"><button onclick="editCat(this,${c.id})">Edit</button><button onclick="deleteCat(${c.id})" style="background:#ffb3b3">Delete</button></td></tr>`).join('');
-}
-
 async function loadGallery(postId) {
     const res = await fetch(`${apiImg}?blog_post_id=${postId}`);
     const imgs = await res.json();
     const cont = document.getElementById(`gal-${postId}`);
-    cont.innerHTML = imgs.length ? '' : '<small>No images</small>';
-    imgs.forEach(img => {
-        const d = document.createElement('div'); d.className = 'gallery-item';
-        d.innerHTML = `<img src="${img.image_url}"><button class="del-img" onclick="deleteImg(${img.id},${postId})">×</button>`;
-        cont.appendChild(d);
-    });
+    cont.innerHTML = imgs.map(img => `<div class="gallery-item"><img src="${img.image?.url || ''}"><button class="del-img" onclick="deleteImg(${img.id},${postId})">×</button></div>`).join('');
 }
-async function addImg(postId) {
-    const url = document.getElementById(`img-url-${postId}`).value;
-    if(!url) return;
-    await fetch(apiImg, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ blog_post_id: postId, image_url: url, created_at: Date.now() }) });
-    document.getElementById(`img-url-${postId}`).value = ''; loadGallery(postId);
+
+/* ---------- Analytics Summary ---------- */
+async function fetchAnalyticsSummary() {
+    const [pRes, lRes] = await Promise.all([fetch(apiPost), fetch(apiAnalytics)]);
+    const posts = await pRes.json(), logs = await lRes.json();
+    document.getElementById('analytics-table-body').innerHTML = posts.map(post => {
+        const postLogs = logs.filter(l => l.blog_post_id === post.id);
+        const uniqueIPs = new Set(postLogs.map(l => l.ip_address)).size;
+        const sources = {}; postLogs.forEach(l => { const s = l.referrer || "Direct"; sources[s] = (sources[s] || 0) + 1; });
+        const sourceTags = Object.entries(sources).sort((a,b)=>b[1]-a[1]).map(([n, c]) => `<span class="source-tag"><b>${n}</b>: ${c}</span>`).join('');
+        return `<tr><td style="text-align:center"><b>${uniqueIPs}</b> / ${postLogs.length}</td><td>${post.title}</td><td>${new Date(post.created_at).toLocaleDateString()}</td><td>${sourceTags || '<small>None</small>'}</td></tr>`;
+    }).join('');
 }
-async function deleteImg(imgId, postId) { await fetch(`${apiImg}/${imgId}`, { method: 'DELETE' }); loadGallery(postId); }
+
+/* ---------- Search & Pagination ---------- */
 function handleSearch() {
     const v = document.getElementById('searchInput').value.toLowerCase();
     filteredPosts = allPosts.filter(p => p.title.toLowerCase().includes(v));
@@ -343,8 +296,7 @@ function renderPagination() {
     const p = document.getElementById('pagination'); p.innerHTML = '';
     const total = Math.ceil(filteredPosts.length / PAGE_SIZE);
     for(let i=1; i<=total; i++) {
-        const b = document.createElement('button');
-        b.className = 'page-btn' + (i===currentPage?' active':'');
+        const b = document.createElement('button'); b.className = 'page-btn'+(i===currentPage?' active':'');
         b.textContent = i; b.onclick = () => { currentPage = i; renderPosts(); }; p.appendChild(b);
     }
 }
