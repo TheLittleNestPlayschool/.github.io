@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Blog Dashboard: Dynamic Author</title>
+<title>Blog Dashboard: Name Only Author</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 
 <style>
@@ -85,10 +85,8 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
     </div>
 
     <div id="tableWrapper">
-        <table id="posts-table">
-            <thead>
-                <tr><th style="width:50px">ID</th><th>Post Details & Gallery</th><th style="width:120px">Actions</th></tr>
-            </thead>
+        <table>
+            <thead><tr><th style="width:50px">ID</th><th>Post Details & Gallery</th><th style="width:120px">Actions</th></tr></thead>
             <tbody id="posts-table-body"></tbody>
         </table>
     </div>
@@ -106,10 +104,7 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
             </div>
             <div class="record-field">
                 <label>Status</label>
-                <select id="cat_is_active">
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                </select>
+                <select id="cat_is_active"><option value="true">Active</option><option value="false">Inactive</option></select>
             </div>
             <div class="record-field"><label>&nbsp;</label><button type="submit">Add Category</button></div>
         </div>
@@ -127,24 +122,21 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
     <h2>Traffic Audit Log</h2>
     <div id="tableWrapper">
         <table>
-            <thead>
-                <tr><th>Date</th><th>Post ID</th><th>IP Address</th><th>Referrer</th><th>Browser</th></tr>
-            </thead>
+            <thead><tr><th>Date</th><th>Post ID</th><th>IP Address</th><th>Referrer</th><th>Browser</th></tr></thead>
             <tbody id="analytics-table-body"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-/* ---------- Auth Check: Pull from Local Storage ---------- */
-// This assumes your sign-in process stores an object in localStorage
-// Example: localStorage.setItem('currentUser', JSON.stringify({name: "Dave Test 2", role: "Super Admin", id: 123}));
+/* ---------- Auth Check: Pull Name from Local Storage ---------- */
+// Simplified to use only the Name string
 const rawUserData = localStorage.getItem('currentUser'); 
-const currentUser = rawUserData ? JSON.parse(rawUserData) : { name: "Dave Test 2", role: "Super Admin", id: 1 };
+const currentUser = rawUserData ? JSON.parse(rawUserData) : { name: "Dave Test 2", id: 1 };
 
 function setAuthorUI() {
     const display = document.getElementById('post_author_display');
-    if(display) display.value = `${currentUser.name} (${currentUser.role})`;
+    if(display) display.value = currentUser.name; // Displays just the name
 }
 
 /* ---------- Helper: Slug Generator ---------- */
@@ -152,8 +144,7 @@ function generateSlug(text) {
     return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
 }
 function autoSlug(sourceId, targetId) {
-    const sourceVal = document.getElementById(sourceId).value;
-    document.getElementById(targetId).value = generateSlug(sourceVal);
+    document.getElementById(targetId).value = generateSlug(document.getElementById(sourceId).value);
 }
 
 /* ---------- Config & State ---------- */
@@ -175,7 +166,6 @@ function switchTab(e, tabId) {
     if(tabId === 'posts') initPosts();
 }
 
-/* ---------- Category CRUD ---------- */
 async function fetchCategories() {
     const res = await fetch(apiCat);
     categories = await res.json();
@@ -234,7 +224,6 @@ document.getElementById('add-category-form').onsubmit = async (e) => {
 
 async function deleteCat(id) { if(confirm('Delete category?')) { await fetch(`${apiCat}/${id}`, { method: 'DELETE' }); fetchCategories(); } }
 
-/* ---------- Posts CRUD ---------- */
 async function initPosts() {
     await fetchCategories();
     const res = await fetch(apiPost);
@@ -317,9 +306,8 @@ document.getElementById('add-post-form').onsubmit = async (e) => {
         content: post_content.value,
         blog_category_id: parseInt(post_category_select.value),
         
-        // DYNAMIC AUTHOR INFO
+        // SAVING ONLY NAME
         author_name: currentUser.name,
-        author_role: currentUser.role,
         author_user_id: currentUser.id,
         
         is_published: post_status.value === 'true',
@@ -328,8 +316,7 @@ document.getElementById('add-post-form').onsubmit = async (e) => {
         created_at: Date.now()
     };
     await fetch(apiPost, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    e.target.reset();
-    initPosts();
+    e.target.reset(); initPosts();
 };
 
 async function deletePost(id) { if(confirm('Delete post?')) { await fetch(`${apiPost}/${id}`, { method: 'DELETE' }); initPosts(); } }
@@ -340,8 +327,7 @@ async function loadGallery(postId) {
     const cont = document.getElementById(`gal-${postId}`);
     cont.innerHTML = imgs.length ? '' : '<small>No images</small>';
     imgs.forEach(img => {
-        const d = document.createElement('div');
-        d.className = 'gallery-item';
+        const d = document.createElement('div'); d.className = 'gallery-item';
         d.innerHTML = `<img src="${img.image_url}"><button class="del-img" onclick="deleteImg(${img.id},${postId})">×</button>`;
         cont.appendChild(d);
     });
@@ -350,22 +336,14 @@ async function addImg(postId) {
     const url = document.getElementById(`img-url-${postId}`).value;
     if(!url) return;
     await fetch(apiImg, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ blog_post_id: postId, image_url: url, created_at: Date.now() }) });
-    document.getElementById(`img-url-${postId}`).value = '';
-    loadGallery(postId);
+    document.getElementById(`img-url-${postId}`).value = ''; loadGallery(postId);
 }
 async function deleteImg(imgId, postId) { await fetch(`${apiImg}/${imgId}`, { method: 'DELETE' }); loadGallery(postId); }
 
 async function fetchAnalytics() {
     const res = await fetch(apiAnalytics);
     const data = await res.json();
-    document.getElementById('analytics-table-body').innerHTML = data.map(a => `
-        <tr>
-            <td>${new Date(a.created_at).toLocaleDateString()}</td>
-            <td>#${a.blog_post_id}</td>
-            <td>${a.ip_address}</td>
-            <td>${a.referrer || 'None'}</td>
-            <td><small>${a.user_agent.substring(0,30)}...</small></td>
-        </tr>`).join('');
+    document.getElementById('analytics-table-body').innerHTML = data.map(a => `<tr><td>${new Date(a.created_at).toLocaleDateString()}</td><td>#${a.blog_post_id}</td><td>${a.ip_address}</td><td>${a.referrer || 'None'}</td><td><small>${a.user_agent.substring(0,30)}...</small></td></tr>`).join('');
 }
 function handleSearch() {
     const v = document.getElementById('searchInput').value.toLowerCase();
@@ -378,9 +356,7 @@ function renderPagination() {
     for(let i=1; i<=total; i++) {
         const b = document.createElement('button');
         b.className = 'page-btn' + (i===currentPage?' active':'');
-        b.textContent = i;
-        b.onclick = () => { currentPage = i; renderPosts(); };
-        p.appendChild(b);
+        b.textContent = i; b.onclick = () => { currentPage = i; renderPosts(); }; p.appendChild(b);
     }
 }
 
