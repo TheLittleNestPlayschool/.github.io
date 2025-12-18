@@ -18,6 +18,7 @@ input,textarea,select{ padding:8px; font-size:14px; box-sizing:border-box; backg
 textarea{min-height:56px; resize:vertical}
 button{ padding:8px 12px; font-size:14px; background-color:var(--primary); border:none; border-radius:4px; cursor:pointer; transition:0.2s; }
 button:hover{ background-color:var(--secondary); color:#fff; }
+button:disabled { background-color: #ccc; cursor: not-allowed; color: #666; }
 .gallery-section { background: #fff5fd; padding: 12px; margin-top: 10px; border-radius: 6px; border: 1px dashed var(--primary); }
 .gallery-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; min-height: 50px; }
 .gallery-item { width: 90px; position: relative; border: 1px solid #ccc; border-radius: 4px; background: white; padding: 2px; }
@@ -80,7 +81,7 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
         <label>Post Content</label>
         <textarea id="post_content" style="min-height:80px"></textarea>
       </div>
-      <button type="submit" style="width:160px;">Add Post</button>
+      <button type="submit" id="add-post-btn" style="width:160px;">Add Post</button>
     </form>
 
     <div style="margin: 20px 0;"><input id="searchInput" placeholder="Search titles..." oninput="handleSearch()" /></div>
@@ -134,7 +135,6 @@ th,td{ border:1px solid #e6e6e6; padding:10px; vertical-align:top; font-size:13p
 </div>
 
 <script>
-/* ---------- State & Endpoints ---------- */
 const apiPost = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_post";
 const apiImg = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_image";
 const apiCat = "https://x8ki-letl-twmt.n7.xano.io/api:zmxHunN9/blog_category";
@@ -145,7 +145,6 @@ const currentUser = rawUserData ? JSON.parse(rawUserData) : { name: "Dave Test 2
 
 let allPosts = [], filteredPosts = [], categories = [], currentPage = 1, PAGE_SIZE = 10;
 
-/* ---------- Core Helpers ---------- */
 function setAuthorUI() { document.getElementById('post_author_display').value = currentUser.name; }
 function autoSlug(src, target) { 
     const val = document.getElementById(src).value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
@@ -160,7 +159,6 @@ function switchTab(e, tabId) {
     if(tabId === 'posts') initPosts();
 }
 
-/* ---------- Category Management ---------- */
 async function fetchCategories() {
     const res = await fetch(apiCat);
     categories = await res.json();
@@ -186,19 +184,20 @@ async function editCat(btn, id) {
     const tr = btn.closest('tr');
     const inputs = tr.querySelectorAll('input, select, textarea');
     if(btn.textContent === 'Edit') { inputs.forEach(i => i.disabled = false); btn.textContent = 'Save'; return; }
+    btn.disabled = true; btn.textContent = "Saving...";
     const payload = {}; inputs.forEach(i => { if(i.dataset.cat) payload[i.dataset.cat] = i.dataset.cat==='is_active'?(i.value==='true'):i.value; });
     await fetch(`${apiCat}/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-    btn.textContent = 'Edit'; fetchCategories();
+    btn.textContent = 'Edit'; btn.disabled = false; fetchCategories();
 }
 async function deleteCat(id) { if(confirm('Delete Category?')) { await fetch(`${apiCat}/${id}`, {method:'DELETE'}); fetchCategories(); } }
 document.getElementById('add-category-form').onsubmit = async (e) => {
     e.preventDefault();
+    const btn = e.target.querySelector('button'); btn.disabled = true; btn.textContent = "...";
     const p = { name:cat_name.value, slug:cat_slug_hidden.value, description:cat_desc.value, is_active:cat_is_active.value==='true', created_at:Date.now() };
     await fetch(apiCat, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(p)});
     e.target.reset(); fetchCategories();
 };
 
-/* ---------- Blog Post CRUD & Corrected Mapping ---------- */
 async function initPosts() {
     await fetchCategories();
     const res = await fetch(apiPost);
@@ -210,48 +209,58 @@ async function initPosts() {
 
 document.getElementById('add-post-form').onsubmit = async (e) => {
     e.preventDefault();
-    let featured_id = null;
-    const fileInput = document.getElementById('post_f_img_file');
+    const btn = document.getElementById('add-post-btn');
+    btn.disabled = true;
+    btn.textContent = "Processing...";
 
-    // STEP 1: Upload to blog_image table first
-    if(fileInput.files[0]) {
-        const fdImg = new FormData();
-        fdImg.append('image_file', fileInput.files[0]);
-        fdImg.append('order_number', 0); 
-        
-        try {
+    try {
+        const postPayload = {
+            title: post_title.value,
+            slug: post_slug_hidden.value,
+            content: post_content.value,
+            blog_category_id: parseInt(post_category_select.value),
+            author_user_id: currentUser.id,
+            is_published: post_status.value === 'true',
+            created_at: Date.now()
+        };
+
+        const postRes = await fetch(apiPost, { 
+            method:'POST', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(postPayload) 
+        });
+        const newPost = await postRes.json();
+
+        const fileInput = document.getElementById('post_f_img_file');
+        if(fileInput.files[0] && newPost.id) {
+            const fdImg = new FormData();
+            fdImg.append('image_file', fileInput.files[0]);
+            fdImg.append('blog_post_id', newPost.id);
+            fdImg.append('order_number', 0); 
+            
             const imgRes = await fetch(apiImg, { method:'POST', body:fdImg });
             const imgData = await imgRes.json();
-            if(imgData.id) featured_id = imgData.id;
-        } catch (err) {
-            console.error("Featured image upload failed", err);
+
+            if(imgData.id) {
+                await fetch(`${apiPost}/${newPost.id}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ featured_blog_image_id: imgData.id })
+                });
+            }
         }
-    }
+    } catch (err) { console.error(err); }
 
-    // STEP 2: Create Blog Post with reference
-    const postPayload = {
-        title: post_title.value,
-        slug: post_slug_hidden.value,
-        content: post_content.value,
-        blog_category_id: parseInt(post_category_select.value),
-        author_name: currentUser.name,
-        is_published: post_status.value === 'true',
-        featured_blog_image_id: featured_id,
-        created_at: Date.now()
-    };
-
-    await fetch(apiPost, { 
-        method:'POST', 
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(postPayload) 
-    });
-
+    btn.disabled = false;
+    btn.textContent = "Add Post";
     e.target.reset(); 
     initPosts();
 };
 
-async function uploadGallery(postId) {
+async function uploadGallery(postId, btn) {
     const fileInput = document.getElementById(`img-file-${postId}`);
+    if (!fileInput.files.length) return;
+    btn.disabled = true; btn.textContent = "Uploading...";
     for(let f of fileInput.files) {
         const fd = new FormData(); 
         fd.append('blog_post_id', postId); 
@@ -260,6 +269,7 @@ async function uploadGallery(postId) {
         await fetch(apiImg, { method:'POST', body:fd });
     }
     fileInput.value=''; 
+    btn.disabled = false; btn.textContent = "Upload Photos";
     loadGallery(postId);
 }
 
@@ -280,14 +290,14 @@ function renderPosts() {
                     <div class="record-field"><label>Title</label><input data-post="title" value="${p.title}" disabled></div>
                     <div class="record-field"><label>Category</label><select data-post="blog_category_id" disabled>${categories.map(c=>`<option value="${c.id}" ${c.id===p.blog_category_id?'selected':''}>${c.name}</option>`).join('')}</select></div>
                     <div class="record-field"><label>Status</label><select data-post="is_published" disabled><option value="true" ${p.is_published?'selected':''}>Published</option><option value="false" ${!p.is_published?'selected':''}>Draft</option></select></div>
-                    <div class="record-field"><label>Author</label><input value="${p.author_name || 'System'}" disabled></div>
+                    <div class="record-field"><label>Author ID</label><input value="${p.author_user_id || ''}" disabled></div>
                 </div>
                 <textarea data-post="content" disabled>${p.content||''}</textarea>
                 <div class="gallery-section">
-                    <div class="gallery-grid" id="gal-${p.id}">Loading Gallery...</div>
+                    <div class="gallery-grid" id="gal-${p.id}">Loading...</div>
                     <div style="margin-top:10px; display:flex; gap:10px;">
                         <input type="file" id="img-file-${p.id}" multiple accept="image/*">
-                        <button onclick="uploadGallery(${p.id})">Upload Photos</button>
+                        <button onclick="uploadGallery(${p.id}, this)">Upload Photos</button>
                     </div>
                 </div>
             </td>
@@ -300,24 +310,24 @@ function renderPosts() {
 async function editPost(btn, id) {
     const tr = btn.closest('tr'); const inputs = tr.querySelectorAll('input, select, textarea');
     if(btn.textContent === 'Edit Post') { inputs.forEach(i=>i.disabled=false); btn.textContent='Save'; return; }
+    btn.disabled = true; btn.textContent = "Saving...";
     const pld = {}; 
     inputs.forEach(i=>{ if(i.dataset.post) pld[i.dataset.post] = i.dataset.post==='is_published'?(i.value==='true'):(i.dataset.post==='blog_category_id'?parseInt(i.value):i.value); });
     await fetch(`${apiPost}/${id}`, {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(pld)});
-    btn.textContent='Edit Post'; initPosts();
+    btn.textContent='Edit Post'; btn.disabled = false; initPosts();
 }
 
 async function loadGallery(postId) {
     const res = await fetch(`${apiImg}?blog_post_id=${postId}`);
     const imgs = await res.json();
     const cont = document.getElementById(`gal-${postId}`);
-    cont.innerHTML = imgs.map(img => `
+    cont.innerHTML = (imgs || []).map(img => `
         <div class="gallery-item">
             <img src="${img.image_file?.url || ''}">
             <button class="del-img" onclick="deleteImg(${img.id},${postId})">×</button>
         </div>`).join('');
 }
 
-/* ---------- Analytics Summary ---------- */
 async function fetchAnalyticsSummary() {
     const [pRes, lRes] = await Promise.all([fetch(apiPost), fetch(apiAnalytics)]);
     const posts = await pRes.json(), logs = await lRes.json();
@@ -330,7 +340,6 @@ async function fetchAnalyticsSummary() {
     }).join('');
 }
 
-/* ---------- Search & Pagination ---------- */
 function handleSearch() {
     const v = document.getElementById('searchInput').value.toLowerCase();
     filteredPosts = allPosts.filter(p => p.title.toLowerCase().includes(v));
