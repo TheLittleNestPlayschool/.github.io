@@ -362,4 +362,138 @@ function renderPosts() {
                     <div class="record-field"><label>Status</label>
                         <select data-post="is_published" disabled>
                             <option value="true" ${p.is_published?'selected':''}>Published</option>
-                            <option value="false" ${!p.is_published?'selected':''
+                            <option value="false" ${!p.is_published?'selected':''}>Draft</option>
+                        </select>
+                    </div>
+                    <div class="record-field"><label>Category</label>
+                        <select data-post="blog_category_id" disabled>
+                            ${categories.map(c => `<option value="${c.id}" ${c.id===p.blog_category_id?'selected':''}>${c.name}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <textarea data-post="content" disabled>${p.content||''}</textarea>
+                <div class="gallery-section">
+                    <div class="gallery-grid" id="gal-${p.id}">Loading...</div>
+                    <div style="margin-top:8px; display:flex; gap:5px;">
+                        <input type="text" id="img-url-${p.id}" placeholder="Image URL">
+                        <button onclick="addImg(${p.id})">Add</button>
+                    </div>
+                </div>
+            </td>
+            <td class="actions">
+                <button onclick="editPost(this,${p.id})">Edit Post</button>
+                <button onclick="deletePost(${p.id})" style="background:#ffb3b3">Delete</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+        loadGallery(p.id);
+    }
+    renderPagination();
+}
+
+async function editPost(btn, id) {
+    const tr = btn.closest('tr');
+    const inputs = tr.querySelectorAll('input, select, textarea');
+    if(btn.textContent === 'Edit Post') { inputs.forEach(i => i.disabled = false); btn.textContent = 'Save'; return; }
+
+    const payload = {};
+    let newTitle = "";
+    inputs.forEach(i => {
+        if(i.dataset.post) {
+            let val = i.value;
+            if(i.dataset.post === 'is_published') val = (val === 'true');
+            if(i.dataset.post === 'blog_category_id') val = parseInt(val);
+            if(i.dataset.post === 'title') newTitle = val;
+            payload[i.dataset.post] = val;
+            i.disabled = true;
+        }
+    });
+
+    if(newTitle) payload.slug = generateSlug(newTitle);
+
+    await fetch(`${apiPost}/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    btn.textContent = 'Edit Post';
+    initPosts();
+}
+
+document.getElementById('add-post-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+        title: post_title.value, 
+        slug: post_slug_hidden.value, 
+        content: post_content.value,
+        blog_category_id: parseInt(post_category_select.value),
+        author_user_id: CURRENT_USER_ID,
+        is_published: post_status.value === 'true',
+        featured_image_url: post_f_img.value,
+        published_at: Date.parse(post_date.value) || Date.now(),
+        created_at: Date.now()
+    };
+    await fetch(apiPost, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    e.target.reset();
+    initPosts();
+};
+
+async function deletePost(id) {
+    if(confirm('Delete post?')) { await fetch(`${apiPost}/${id}`, { method: 'DELETE' }); initPosts(); }
+}
+
+/* ---------- Gallery & Analytics ---------- */
+async function loadGallery(postId) {
+    const res = await fetch(`${apiImg}?blog_post_id=${postId}`);
+    const imgs = await res.json();
+    const cont = document.getElementById(`gal-${postId}`);
+    cont.innerHTML = imgs.length ? '' : '<small>No images</small>';
+    imgs.forEach(img => {
+        const d = document.createElement('div');
+        d.className = 'gallery-item';
+        d.innerHTML = `<img src="${img.image_url}"><button class="del-img" onclick="deleteImg(${img.id},${postId})">×</button>`;
+        cont.appendChild(d);
+    });
+}
+async function addImg(postId) {
+    const url = document.getElementById(`img-url-${postId}`).value;
+    if(!url) return;
+    await fetch(apiImg, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ blog_post_id: postId, image_url: url, created_at: Date.now() }) });
+    document.getElementById(`img-url-${postId}`).value = '';
+    loadGallery(postId);
+}
+async function deleteImg(imgId, postId) {
+    await fetch(`${apiImg}/${imgId}`, { method: 'DELETE' });
+    loadGallery(postId);
+}
+async function fetchAnalytics() {
+    const res = await fetch(apiAnalytics);
+    const data = await res.json();
+    document.getElementById('analytics-table-body').innerHTML = data.map(a => `
+        <tr>
+            <td>${new Date(a.created_at).toLocaleDateString()}</td>
+            <td>#${a.blog_post_id}</td>
+            <td>${a.ip_address}</td>
+            <td>${a.referrer || 'None'}</td>
+            <td><small>${a.user_agent.substring(0,30)}...</small></td>
+        </tr>
+    `).join('');
+}
+function handleSearch() {
+    const v = document.getElementById('searchInput').value.toLowerCase();
+    filteredPosts = allPosts.filter(p => p.title.toLowerCase().includes(v));
+    currentPage = 1; renderPosts();
+}
+function renderPagination() {
+    const p = document.getElementById('pagination');
+    p.innerHTML = '';
+    const total = Math.ceil(filteredPosts.length / PAGE_SIZE);
+    for(let i=1; i<=total; i++) {
+        const b = document.createElement('button');
+        b.className = 'page-btn' + (i===currentPage?' active':'');
+        b.textContent = i;
+        b.onclick = () => { currentPage = i; renderPosts(); };
+        p.appendChild(b);
+    }
+}
+
+initPosts();
+</script>
+</body>
+</html>
