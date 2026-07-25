@@ -7,6 +7,7 @@ function toggleAccordion(element) {
 // --- Modal Logic ---
 function openModal(id) {
     const modal = document.getElementById(id);
+    if (!modal) return;
     modal.classList.add('show');
 
     if (id === 'my-data-modal') {
@@ -14,14 +15,12 @@ function openModal(id) {
             .then(response => response.text())
             .then(data => {
                 document.getElementById('profile-content').innerHTML = data;
-                // Populate with the existing data once loaded
                 if (window.latestDashboardData) {
                     populateUI(window.latestDashboardData);
                 }
             })
             .catch(error => console.error('Error loading profile.html:', error));
     } else if (id === 'gallery-modal') {
-        // Fetch the full gallery content when opening the gallery modal
         fetch('gallery.html')
             .then(response => response.text())
             .then(data => {
@@ -32,11 +31,11 @@ function openModal(id) {
 }
 
 function closeModal(id) {
-    document.getElementById(id).classList.remove('show');
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('show');
 }
 
 // --- Main Dashboard Loading Logic ---
-// Store data globally to be accessible by modals
 window.latestDashboardData = null;
 
 async function loadDashboard() {
@@ -46,7 +45,7 @@ async function loadDashboard() {
     try {
         const response = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId);
         const data = await response.json();
-        window.latestDashboardData = data; // Store data
+        window.latestDashboardData = data; 
 
         // Mapping files to the grid containers in dashboard.html
         const files = [
@@ -56,19 +55,26 @@ async function loadDashboard() {
             { id: 'gallery-container', url: './gallery_main.html' }
         ];
 
+        // Ensure all component HTML files are loaded into DOM completely first
         await Promise.all(files.map(async (file) => {
-            const res = await fetch(file.url);
-            if (res.ok) {
-                const container = document.getElementById(file.id);
-                if (container) container.innerHTML = await res.text();
+            try {
+                const res = await fetch(file.url);
+                if (res.ok) {
+                    const htmlText = await res.text();
+                    const container = document.getElementById(file.id);
+                    if (container) container.innerHTML = htmlText;
+                }
+            } catch (e) {
+                console.error(`Failed to load partial ${file.url}:`, e);
             }
         }));
 
+        // Now populate user & banner details
         populateUI(data);
 
+        // Fetch session data and update target IDs
         if (data.franchise_data?.current_session) {
             await loadSession(data.franchise_data.current_session);
-            // Increment the current session to get the next one for "Up Next"
             const nextSessionId = parseInt(data.franchise_data.current_session) + 1;
             await loadUpcoming(nextSessionId);
         }
@@ -82,7 +88,6 @@ async function loadSession(sessionId) {
         const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_session_details?session_number=${sessionId}`);
         const data = await res.json();
         if (data) {
-            // Mapping short description for recap
             const descEl = document.getElementById('session-short-description');
             if (descEl) descEl.innerText = data.short_description || 'No summary available for today.';
             
@@ -109,7 +114,6 @@ async function loadUpcoming(upcomingSessionId) {
         const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_up_session_details?session_number=${upcomingSessionId}`);
         const data = await res.json();
         if (data) {
-            // Mapping short description for upcoming
             const descEl = document.getElementById('up-session-short-description');
             if (descEl) descEl.innerText = data.short_description || 'No summary available for next session.';
             
@@ -141,13 +145,11 @@ async function loadUpcoming(upcomingSessionId) {
 }
 
 function populateUI(data) {
-    // Populate Header Banner franchise name
     if (data.franchise_data) {
         const locHeaderEl = document.getElementById('franchise-name-display');
         if (locHeaderEl) locHeaderEl.innerText = data.franchise_data.name || '';
     }
 
-    // Populate Parent/Student Banner
     const p = data.parent_data;
     if (p) {
         const nameEl = document.getElementById('parent-name');
@@ -158,7 +160,6 @@ function populateUI(data) {
         if (studentEl) studentEl.innerText = data.student_data[0].name || 'N/A';
     }
 
-    // Populate profile modal fields if they exist
     const emailEl = document.getElementById('parent-email');
     if (emailEl && p) emailEl.innerText = p.email || 'N/A';
         
@@ -168,7 +169,6 @@ function populateUI(data) {
     const addressEl = document.getElementById('parent-address');
     if (addressEl && p) addressEl.innerText = p.address || 'N/A';
 
-    // Populate Gauges
     const progress = data.student_progress || {};
     ['reading', 'writing', 'alphabet', 'numbers', 'manners'].forEach(type => {
         const el = document.getElementById(`gauge-${type}`);
@@ -176,7 +176,6 @@ function populateUI(data) {
     });
 }
 
-// --- Desktop Drag-to-Scroll Support ---
 function enableDragScroll(containerId) {
     const el = document.getElementById(containerId);
     if (!el) return;
