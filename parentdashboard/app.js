@@ -88,8 +88,9 @@ async function loadSession(sessionId) {
         const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_session_details?session_number=${sessionId}`);
         const data = await res.json();
         if (data) {
+            // Mapped to Xano field: todays_description
             const descEl = document.getElementById('session-short-description');
-            if (descEl) descEl.innerText = data.short_description || 'No summary available for today.';
+            if (descEl) descEl.innerText = data.todays_description || 'No summary available for today.';
             
             const fields = {
                 'session-num': data.session_num, 
@@ -114,8 +115,9 @@ async function loadUpcoming(upcomingSessionId) {
         const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_up_session_details?session_number=${upcomingSessionId}`);
         const data = await res.json();
         if (data) {
+            // Mapped to Xano field: next_description
             const descEl = document.getElementById('up-session-short-description');
-            if (descEl) descEl.innerText = data.short_description || 'No summary available for next session.';
+            if (descEl) descEl.innerText = data.next_description || 'No summary available for next session.';
             
             const fields = {
                 'up-session-num': data.session_num, 
