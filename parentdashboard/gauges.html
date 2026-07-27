@@ -4,21 +4,21 @@
         <div class="gauge-wrapper" title="Literacy (Reading & Writing)" style="text-align: center; margin-bottom: 12px;">
             <div class="book-badge" id="gauge-literacy">
                 <svg class="book-svg" viewBox="0 0 52 52">
-                    <!-- Lighter Blue Base with Black Border -->
-                    <path class="book-base" d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#BBDEFB" stroke="#1A1A1A" stroke-width="2" />
-                    <!-- Darker Blue Fill Mask -->
-                    <g style="clip-path: url(#book-clip)">
-                        <path class="book-fill" d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#1565C0" stroke="#1A1A1A" stroke-width="2" />
+                    <!-- Light Blue Base Background -->
+                    <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#BBDEFB" stroke="#1A1A1A" stroke-width="2" />
+                    <!-- Dark Blue Fill (Clipped to show from bottom up) -->
+                    <g clip-path="url(#book-clip)">
+                        <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#1565C0" stroke="#1A1A1A" stroke-width="2" />
                     </g>
                     <defs>
                         <clipPath id="book-clip">
-                            <rect x="0" y="52" width="52" height="52" id="book-clip-rect" />
+                            <rect x="0" y="0" width="52" height="52" id="book-clip-rect" />
                         </clipPath>
                     </defs>
                 </svg>
                 <span id="literacy-value">-</span>
             </div>
-            <div class="gauge-label">Literacy</div>
+            <div class="gauge-label">Literacy111</div>
             <div class="badge-slot" id="badge-literacy"></div>
         </div>
         
