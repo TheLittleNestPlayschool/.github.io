@@ -191,22 +191,13 @@ function populateUI(data) {
 
         gaugeKeys.forEach(key => {
             const val = student[key] ?? 0;
-            
-            let targetId;
-            if (key === 'literacy') {
-                targetId = 'literacy-value';
-            } else if (key === 'my_hours') {
-                targetId = 'hours-value';
-            } else {
-                targetId = `${key}-value`;
-            }
+            const targetId = `${key}-value`;
                            
             const elem = document.getElementById(targetId);
             if (elem) {
                 elem.textContent = val;
             }
 
-            // Keep progress property update for literacy if container exists
             if (key === 'literacy') {
                 const litContainer = document.getElementById('gauge-literacy');
                 if (litContainer) litContainer.style.setProperty('--progress', `${val}%`);
