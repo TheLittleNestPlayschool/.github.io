@@ -232,15 +232,12 @@ function populateUI(data) {
             const percentage = (val / 20) * 100;
 
             if (id === 'literacy-value') {
-                const litContainer = document.getElementById('gauge-literacy');
-                if (litContainer) {
-                    const clipRect = document.getElementById('book-clip-rect');
-                    if (clipRect) {
-                        // Set the clipping mask height to cover the unfilled top portion (18/20 of the height)
-                        const unfilledHeight = 52 * (1 - (val / 20));
-                        clipRect.setAttribute('y', '0');
-                        clipRect.setAttribute('height', unfilledHeight);
-                    }
+                const fillRect = document.getElementById('literacy-fill-rect');
+                if (fillRect) {
+                    const ratio = val / 20;
+                    const fillHeight = 52 * ratio;
+                    const yPos = 52 - fillHeight;
+                    fillRect.setAttribute('y', yPos);
                 }
             } else {
                 const baseId = id.replace('-value', '');
