@@ -1,4 +1,3 @@
-
 // --- Accordion Toggle Logic ---
 function toggleAccordion(element) {
     const content = element.nextElementSibling;
@@ -223,11 +222,22 @@ function populateUI(data) {
         for (const [id, value] of Object.entries(gaugeFields)) {
             const el = document.getElementById(id);
             const val = value ?? 0;
+            
             if (el) el.textContent = val;
+
+            if (id === 'my_hours-value') {
+                continue;
+            }
+
+            const percentage = (val / 10) * 100;
 
             if (id === 'literacy-value') {
                 const litContainer = document.getElementById('gauge-literacy');
-                if (litContainer) litContainer.style.setProperty('--progress', `${val}%`);
+                if (litContainer) litContainer.style.setProperty('--progress', `${percentage}%`);
+            } else {
+                const baseId = id.replace('-value', '');
+                const container = document.getElementById(`gauge-${baseId}`);
+                if (container) container.style.setProperty('--progress', `${percentage}%`);
             }
         }
     } else {
