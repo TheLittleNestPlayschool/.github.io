@@ -1,4 +1,3 @@
-
 // --- Accordion Toggle Logic ---
 function toggleAccordion(element) {
     const content = element.nextElementSibling;
@@ -60,14 +59,12 @@ async function loadDashboard() {
     try {
         console.log("Fetching dashboard data for user ID:", userId);
 
-        // Reverted to single call that pulls parent, franchise, and student data together
         const response = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId);
         const data = await response.json();
         
         console.log("Dashboard API Response:", data);
         window.latestDashboardData = data; 
 
-        // Set missing local storage variables for franchise and student
         if (data.franchise_data) {
             localStorage.setItem('franchise_id', data.franchise_data.id);
             localStorage.setItem('franchise_name', data.franchise_data.name);
@@ -78,7 +75,6 @@ async function loadDashboard() {
             localStorage.setItem('student_id', student.id);
         }
 
-        // Mapping files to the grid containers
         const files = [
             { id: 'gauges-container', url: './gauges.html' },
             { id: 'current-container', url: './recap.html' },
@@ -86,7 +82,6 @@ async function loadDashboard() {
             { id: 'gallery-container', url: './gallery_main.html' }
         ];
 
-        // Ensure all component HTML files are loaded into DOM completely first
         await Promise.all(files.map(async (file) => {
             try {
                 const res = await fetch(file.url);
@@ -102,10 +97,8 @@ async function loadDashboard() {
             }
         }));
 
-        // Now populate user & banner details and gauges
         populateUI(data);
 
-        // Fetch session data and update target IDs
         if (data.franchise_data && data.franchise_data.current_session) {
             await loadSession(data.franchise_data.current_session);
             const nextSessionId = parseInt(data.franchise_data.current_session) + 1;
@@ -197,37 +190,29 @@ function populateUI(data) {
         const studentEl = document.getElementById('student-name');
         if (studentEl) studentEl.innerText = student.name || 'N/A';
 
-        // Direct mapping keys matching your exact database columns
-        const gaugeKeys = [
-            'literacy',
-            'fine_motor',
-            'numeracy',
-            'oral_lang',
-            'gross_motor',
-            'receptive_lang',
-            'personal',
-            'creative_arts',
-            'my_world',
-            'my_hours'
-        ];
+        const gaugeFields = {
+            'literacy-value': student.literacy,
+            'fine_motor-value': student.fine_motor,
+            'numeracy-value': student.numeracy,
+            'oral_lang-value': student.oral_lang,
+            'gross_motor-value': student.gross_motor,
+            'receptive_lang-value': student.receptive_lang,
+            'personal-value': student.personal,
+            'creative_arts-value': student.creative_arts,
+            'my_world-value': student.my_world,
+            'my_hours-value': student.my_hours
+        };
 
-        gaugeKeys.forEach(key => {
-            const val = student[key] !== undefined && student[key] !== null ? student[key] : 0;
-            const targetId = `${key}-value`;
-                           
-            const elem = document.getElementById(targetId);
-            if (elem) {
-                elem.textContent = val;
-                console.log(`Successfully bound ${targetId} -> ${val}`);
-            } else {
-                console.warn(`DOM element missing for targetId: ${targetId}`);
-            }
+        for (const [id, value] of Object.entries(gaugeFields)) {
+            const el = document.getElementById(id);
+            const val = value ?? 0;
+            if (el) el.textContent = val;
 
-            if (key === 'literacy') {
+            if (id === 'literacy-value') {
                 const litContainer = document.getElementById('gauge-literacy');
                 if (litContainer) litContainer.style.setProperty('--progress', `${val}%`);
             }
-        });
+        }
     } else {
         console.warn("No student record found to populate gauges.");
     }
