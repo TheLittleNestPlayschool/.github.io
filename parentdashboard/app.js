@@ -233,7 +233,7 @@ function populateUI(data) {
 
             if (id === 'literacy-value') {
                 const litContainer = document.getElementById('gauge-literacy');
-                if (litContainer) litContainer.style.setProperty('--progress', `${percentage}%`);
+                if (litContainer) litContainer.style.setProperty('--fill-pct', val / 10);
             } else {
                 const baseId = id.replace('-value', '');
                 const container = document.getElementById(`gauge-${baseId}`);
