@@ -236,8 +236,8 @@ function populateUI(data) {
                 if (fillRect) {
                     const ratio = val / 20;
                     const fillHeight = 52 * ratio;
-                    const yPos = 52 - fillHeight;
-                    fillRect.setAttribute('y', yPos);
+                    fillRect.setAttribute('y', 52 - fillHeight);
+                    fillRect.setAttribute('height', fillHeight);
                 }
             } else {
                 const baseId = id.replace('-value', '');
