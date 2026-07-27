@@ -188,6 +188,12 @@ function populateUI(data) {
             if (el) {
                 const value = student[metric] || 0;
                 el.style.setProperty('--progress', `${value}%`);
+                
+                // If the element has an internal text span (like literacy), update it
+                const textEl = el.querySelector('.gauge-value-text');
+                if (textEl) {
+                    textEl.textContent = value > 0 ? value : '';
+                }
             }
         });
 
@@ -248,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
     enableDragScroll('content-area');
     enableDragScroll('gauges-container');
     
-    // Enable drag-scroll on modals after opening or dynamically if needed
     const modalIds = ['my-data-modal', 'gallery-modal', 'message-modal', 'badges-modal'];
     modalIds.forEach(id => {
         enableDragScroll(id);
