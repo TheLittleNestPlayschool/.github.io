@@ -32,7 +32,7 @@ body {
         radial-gradient(circle at 100% 0%, rgba(255, 213, 79, 0.45) 0%, transparent 22%), /* Soft Yellow: Top Right */
         radial-gradient(circle at 50% 0%, #F48FB1 0%, transparent 60%),
         radial-gradient(circle at 15% 20%, #CE93D8 0%, transparent 55%),
-        radial-gradient(circle at 85% 45%, #26A69A 0%, transparent 50%),                   /* Teal Accent: Middle Right */
+        radial-gradient(circle at 85% 45%, #26A69A 0%, transparent 50%),            /* Teal Accent: Middle Right */
         radial-gradient(circle at 0% 80%, rgba(38, 166, 154, 0.28) 0%, transparent 18%),   /* Teal Accent: Lower Left */
         radial-gradient(circle at 10% 70%, #FFB74D 0%, transparent 50%),
         radial-gradient(circle at 50% 100%, #FFE082 0%, transparent 60%);
@@ -244,6 +244,14 @@ body {
     background: conic-gradient(#00C853 var(--progress, 100%), rgba(0, 0, 0, 0.15) 0);
 }
 
+.gauge-circle span {
+    position: relative;
+    z-index: 2;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-black);
+}
+
 .gauge-circle::before {
     content: "";
     width: 32px;
@@ -251,6 +259,7 @@ body {
     border-radius: 50%;
     background: var(--white);
     position: absolute;
+    z-index: 1;
 }
 
 .gauge-label {
