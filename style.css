@@ -228,19 +228,19 @@ body {
 }
 
 .gauge-circle {
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 55%, transparent 56%), conic-gradient(#1565C0 var(--progress, 0%), #BBDEFB 0%);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: 1px solid rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.7);
+    background: conic-gradient(#1565C0 var(--progress, 0%), rgba(255, 255, 255, 0.35) 0%);
+    -webkit-mask: radial-gradient(circle, transparent 52%, black 53%);
+    mask: radial-gradient(circle, transparent 52%, black 53%);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 4px;
     position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .gauge-circle::before {
@@ -248,15 +248,11 @@ body {
 }
 
 .gauge-circle.green {
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 55%, transparent 56%), conic-gradient(#1565C0 var(--progress, 0%), #BBDEFB 0%);
+    background: conic-gradient(#1565C0 var(--progress, 0%), rgba(255, 255, 255, 0.35) 0%);
 }
 
 .gauge-circle span {
-    position: relative;
-    z-index: 2;
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--text-black);
+    display: none;
 }
 
 .gauge-label {
