@@ -1,11 +1,11 @@
-<div class="module-box" style="height: 100%; overflow-y: auto;">
+    <div class="module-box" style="height: 100%; overflow-y: auto;">
     <div class="gauge-column" style="display: flex; flex-direction: column; align-items: center; padding: 6px 0;">
         <!-- 1. Literacy -->
         <div class="gauge-wrapper" title="Literacy (Reading & Writing)" style="text-align: center;">
             <div class="gauge-circle" id="gauge-literacy">
                 <span id="literacy-value">-</span>
             </div>
-            <div class="gauge-label">Literacy goes here</div>
+            <div class="gauge-label">Literacy is here</div>
             <div class="badge-slot" id="badge-literacy"></div>
         </div>
         
@@ -84,7 +84,9 @@
         <!-- 10. My Hours -->
         <div class="gauge-wrapper" title="My Hours" style="text-align: center;">
             <div class="gauge-circle green" id="gauge-my_hours">
-                <span id="my_hours-value">-</span>
+                <div style="width: calc(100% - 6px); height: calc(100% - 6px); border-radius: 50%; background-color: #2E7D32; display: flex; align-items: center; justify-content: center;">
+                    <span id="my_hours-value">-</span>
+                </div>
             </div>
             <div class="gauge-label">My Hours</div>
             <div class="badge-slot" id="badge-my_hours"></div>
