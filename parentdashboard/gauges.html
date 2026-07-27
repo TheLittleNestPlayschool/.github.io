@@ -2,91 +2,104 @@
     <div class="gauge-column" style="display: flex; flex-direction: column; align-items: center; padding: 6px 0;">
         <!-- 1. Literacy -->
         <div class="gauge-wrapper" title="Literacy (Reading & Writing)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-literacy" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="literacy-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="book-badge" id="gauge-literacy" style="--fill-pct: 0;">
+                <svg class="book-svg" viewBox="0 0 52 52">
+                    <!-- Background Book Shape / Base Slot -->
+                    <path class="book-base" d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" />
+                    <!-- Filling Mask/Layer -->
+                    <g style="clip-path: url(#book-clip)">
+                        <path class="book-fill" d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="var(--bright-pink)" />
+                    </g>
+                    <defs>
+                        <clipPath id="book-clip">
+                            <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" />
+                        </clipPath>
+                    </defs>
+                </svg>
+                <span id="literacy-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">Literacy</div>
+            <div class="gauge-label">Literacy</div>
             <div class="badge-slot" id="badge-literacy"></div>
         </div>
         
         <!-- 2. Fine Motor -->
         <div class="gauge-wrapper" title="Fine Motor (Tracing & Manipulation)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-fine_motor" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="fine_motor-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle" id="gauge-fine_motor" style="--progress: 0%;">
+                <span id="fine_motor-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">Fine Motor</div>
+            <div class="gauge-label">Fine Motor</div>
             <div class="badge-slot" id="badge-fine_motor"></div>
         </div>
         
         <!-- 3. Numeracy -->
         <div class="gauge-wrapper" title="Numeracy (Numbers & Logic)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-numeracy" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="numeracy-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle" id="gauge-numeracy" style="--progress: 0%;">
+                <span id="numeracy-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">Numeracy</div>
+            <div class="gauge-label">Numeracy</div>
             <div class="badge-slot" id="badge-numeracy"></div>
         </div>
         
         <!-- 4. Oral Language -->
         <div class="gauge-wrapper" title="Oral Language (Communication)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-oral_lang" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="oral_lang-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle" id="gauge-oral_lang" style="--progress: 0%;">
+                <span id="oral_lang-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">Oral Lang.</div>
+            <div class="gauge-label">Oral Lang.</div>
             <div class="badge-slot" id="badge-oral_lang"></div>
         </div>
         
         <!-- 5. Gross Motor -->
         <div class="gauge-wrapper" title="Gross Motor (Movement & Coordination)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-gross_motor" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="gross_motor-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle" id="gauge-gross_motor" style="--progress: 0%;">
+                <span id="gross_motor-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">Gross Motor</div>
+            <div class="gauge-label">Gross Motor</div>
             <div class="badge-slot" id="badge-gross_motor"></div>
         </div>
         
         <!-- 6. Receptive Language -->
         <div class="gauge-wrapper" title="Receptive Language (Listening & Understanding)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-receptive_lang" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="receptive_lang-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle" id="gauge-receptive_lang" style="--progress: 0%;">
+                <span id="receptive_lang-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">Receptive Lang.</div>
+            <div class="gauge-label">Receptive Lang.</div>
             <div class="badge-slot" id="badge-receptive_lang"></div>
         </div>
         
         <!-- 7. Personal & Social -->
         <div class="gauge-wrapper" title="Personal & Social (Manners & Character)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-personal" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="personal-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle" id="gauge-personal" style="--progress: 0%;">
+                <span id="personal-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">P & S</div>
+            <div class="gauge-label">P & S</div>
             <div class="badge-slot" id="badge-personal"></div>
         </div>
         
         <!-- 8. Creative Arts -->
         <div class="gauge-wrapper" title="Creative Arts (Expression)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-creative_arts" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="creative_arts-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle" id="gauge-creative_arts" style="--progress: 0%;">
+                <span id="creative_arts-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">Creative Arts</div>
+            <div class="gauge-label">Creative Arts</div>
             <div class="badge-slot" id="badge-creative_arts"></div>
         </div>
         
         <!-- 9. World Inquiry -->
         <div class="gauge-wrapper" title="World Inquiry (Exploration)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-my_world" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="my_world-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle" id="gauge-my_world" style="--progress: 0%;">
+                <span id="my_world-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">World Inquiry</div>
+            <div class="gauge-label">World Inquiry</div>
             <div class="badge-slot" id="badge-my_world"></div>
         </div>
 
         <!-- 10. My Hours -->
         <div class="gauge-wrapper" title="My Hours" style="text-align: center; margin-bottom: 6px;">
-            <div class="gauge-circle" id="gauge-my_hours" style="width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #e0e0e0; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                <span id="my_hours-value" style="font-size: 9px; font-weight: bold; color: #2D1B4E;">-</span>
+            <div class="gauge-circle green" id="gauge-my_hours" style="--progress: 100%;">
+                <span id="my_hours-value">-</span>
             </div>
-            <div class="gauge-label" style="font-size: 7px; font-weight: bold; margin-top: 6px;">My Hours</div>
+            <div class="gauge-label">My Hours</div>
             <div class="badge-slot" id="badge-my_hours"></div>
         </div>
     </div>
