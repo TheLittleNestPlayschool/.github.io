@@ -4,11 +4,11 @@
         <div class="gauge-wrapper" title="Literacy (Reading & Writing)" style="text-align: center; margin-bottom: 12px;">
             <div class="book-badge" id="gauge-literacy" style="--fill-pct: 0;">
                 <svg class="book-svg" viewBox="0 0 52 52">
-                    <!-- Background Book Shape / Base Slot -->
-                    <path class="book-base" d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" />
-                    <!-- Filling Mask/Layer -->
+                    <!-- Background Book Shape / Base Slot with Light Fill and Black Border -->
+                    <path class="book-base" d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#E3F2FD" stroke="#1A1A1A" stroke-width="2" />
+                    <!-- Filling Mask/Layer (Blue) -->
                     <g style="clip-path: url(#book-clip)">
-                        <path class="book-fill" d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="var(--bright-pink)" />
+                        <path class="book-fill" d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#2196F3" />
                     </g>
                     <defs>
                         <clipPath id="book-clip">
@@ -24,7 +24,7 @@
         
         <!-- 2. Fine Motor -->
         <div class="gauge-wrapper" title="Fine Motor (Tracing & Manipulation)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-fine_motor" style="--progress: 0%;">
+            <div class="gauge-circle" id="gauge-fine_motor" style="--progress: 0%; background: conic-gradient(#2196F3 var(--progress), #E3F2FD 0); border: 2px solid #1A1A1A;">
                 <span id="fine_motor-value">-</span>
             </div>
             <div class="gauge-label">Fine Motor</div>
@@ -33,7 +33,7 @@
         
         <!-- 3. Numeracy -->
         <div class="gauge-wrapper" title="Numeracy (Numbers & Logic)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-numeracy" style="--progress: 0%;">
+            <div class="gauge-circle" id="gauge-numeracy" style="--progress: 0%; background: conic-gradient(#2196F3 var(--progress), #E3F2FD 0); border: 2px solid #1A1A1A;">
                 <span id="numeracy-value">-</span>
             </div>
             <div class="gauge-label">Numeracy</div>
@@ -42,7 +42,7 @@
         
         <!-- 4. Oral Language -->
         <div class="gauge-wrapper" title="Oral Language (Communication)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-oral_lang" style="--progress: 0%;">
+            <div class="gauge-circle" id="gauge-oral_lang" style="--progress: 0%; background: conic-gradient(#2196F3 var(--progress), #E3F2FD 0); border: 2px solid #1A1A1A;">
                 <span id="oral_lang-value">-</span>
             </div>
             <div class="gauge-label">Oral Lang.</div>
@@ -51,7 +51,7 @@
         
         <!-- 5. Gross Motor -->
         <div class="gauge-wrapper" title="Gross Motor (Movement & Coordination)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-gross_motor" style="--progress: 0%;">
+            <div class="gauge-circle" id="gauge-gross_motor" style="--progress: 0%; background: conic-gradient(#2196F3 var(--progress), #E3F2FD 0); border: 2px solid #1A1A1A;">
                 <span id="gross_motor-value">-</span>
             </div>
             <div class="gauge-label">Gross Motor</div>
@@ -60,7 +60,7 @@
         
         <!-- 6. Receptive Language -->
         <div class="gauge-wrapper" title="Receptive Language (Listening & Understanding)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-receptive_lang" style="--progress: 0%;">
+            <div class="gauge-circle" id="gauge-receptive_lang" style="--progress: 0%; background: conic-gradient(#2196F3 var(--progress), #E3F2FD 0); border: 2px solid #1A1A1A;">
                 <span id="receptive_lang-value">-</span>
             </div>
             <div class="gauge-label">Receptive Lang.</div>
@@ -69,7 +69,7 @@
         
         <!-- 7. Personal & Social -->
         <div class="gauge-wrapper" title="Personal & Social (Manners & Character)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-personal" style="--progress: 0%;">
+            <div class="gauge-circle" id="gauge-personal" style="--progress: 0%; background: conic-gradient(#2196F3 var(--progress), #E3F2FD 0); border: 2px solid #1A1A1A;">
                 <span id="personal-value">-</span>
             </div>
             <div class="gauge-label">P & S</div>
@@ -78,7 +78,7 @@
         
         <!-- 8. Creative Arts -->
         <div class="gauge-wrapper" title="Creative Arts (Expression)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-creative_arts" style="--progress: 0%;">
+            <div class="gauge-circle" id="gauge-creative_arts" style="--progress: 0%; background: conic-gradient(#2196F3 var(--progress), #E3F2FD 0); border: 2px solid #1A1A1A;">
                 <span id="creative_arts-value">-</span>
             </div>
             <div class="gauge-label">Creative Arts</div>
@@ -87,7 +87,7 @@
         
         <!-- 9. World Inquiry -->
         <div class="gauge-wrapper" title="World Inquiry (Exploration)" style="text-align: center; margin-bottom: 12px;">
-            <div class="gauge-circle" id="gauge-my_world" style="--progress: 0%;">
+            <div class="gauge-circle" id="gauge-my_world" style="--progress: 0%; background: conic-gradient(#2196F3 var(--progress), #E3F2FD 0); border: 2px solid #1A1A1A;">
                 <span id="my_world-value">-</span>
             </div>
             <div class="gauge-label">World Inquiry</div>
@@ -96,7 +96,7 @@
 
         <!-- 10. My Hours -->
         <div class="gauge-wrapper" title="My Hours" style="text-align: center; margin-bottom: 6px;">
-            <div class="gauge-circle green" id="gauge-my_hours" style="--progress: 100%;">
+            <div class="gauge-circle green" id="gauge-my_hours" style="--progress: 100%; background: conic-gradient(#00C853 var(--progress, 100%), #E8F5E9 0); border: 2px solid #1A1A1A;">
                 <span id="my_hours-value">-</span>
             </div>
             <div class="gauge-label">My Hours</div>
