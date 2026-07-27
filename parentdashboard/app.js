@@ -233,11 +233,20 @@ function populateUI(data) {
 
             if (id === 'literacy-value') {
                 const litContainer = document.getElementById('gauge-literacy');
-                if (litContainer) litContainer.style.setProperty('--fill-pct', val / 10);
+                if (litContainer) {
+                    const clipRect = document.getElementById('book-clip-rect');
+                    if (clipRect) {
+                        const heightPx = 52 - (52 * (val / 10));
+                        clipRect.setAttribute('y', heightPx);
+                        clipRect.setAttribute('height', 52);
+                    }
+                }
             } else {
                 const baseId = id.replace('-value', '');
                 const container = document.getElementById(`gauge-${baseId}`);
-                if (container) container.style.setProperty('--progress', `${percentage}%`);
+                if (container) {
+                    container.style.background = `conic-gradient(#2196F3 ${percentage}%, #E3F2FD ${percentage}%)`;
+                }
             }
         }
     } else {
