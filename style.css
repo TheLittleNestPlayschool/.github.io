@@ -231,10 +231,8 @@ body {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.25) 64%, transparent 65% 100%), conic-gradient(#1565C0 var(--progress, 0%), #BBDEFB 0%);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: 2px solid rgba(26, 26, 26, 0.4);
+    background: conic-gradient(#1565C0 var(--progress, 0%), #BBDEFB 0%);
+    border: 1px solid rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -243,8 +241,19 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
+.gauge-circle::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: 50%;
+    z-index: 1;
+}
+
 .gauge-circle.green {
-    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.25) 64%, transparent 65% 100%), conic-gradient(#1565C0 var(--progress, 0%), #BBDEFB 0%);
+    background: conic-gradient(#1565C0 var(--progress, 0%), #BBDEFB 0%);
 }
 
 .gauge-circle span {
