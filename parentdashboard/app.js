@@ -57,24 +57,27 @@ async function loadDashboard() {
     if (!userId) { window.location.href = './login.html'; return; }
 
     try {
-        // Fetch both parents/dashboard and student metrics in parallel
-        const [parentRes, studentRes] = await Promise.all([
-            fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId),
-            fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_students?user_id=' + userId)
-        ]);
+        console.log("Fetching dashboard data for user ID:", userId);
 
-        const parentData = await parentRes.json();
-        const studentData = await studentRes.json();
-
-        // Combine both data payloads into our global dashboard container object
-        const data = {
-            ...parentData,
-            student_data: Array.isArray(studentData) ? studentData : [studentData]
-        };
-
+        // Reverted to single call that pulls parent, franchise, and student data together
+        const response = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId);
+        const data = await response.json();
+        
+        console.log("Dashboard API Response:", data);
         window.latestDashboardData = data; 
 
-        // Mapping files to the grid containers in dashboard.html
+        // Set missing local storage variables for franchise and student
+        if (data.franchise_data) {
+            localStorage.setItem('franchise_id', data.franchise_data.id);
+            localStorage.setItem('franchise_name', data.franchise_data.name);
+        }
+        
+        const student = Array.isArray(data.student_data) ? data.student_data[0] : data.student_data;
+        if (student && student.id) {
+            localStorage.setItem('student_id', student.id);
+        }
+
+        // Mapping files to the grid containers
         const files = [
             { id: 'gauges-container', url: './gauges.html' },
             { id: 'current-container', url: './recap.html' },
@@ -90,6 +93,8 @@ async function loadDashboard() {
                     const htmlText = await res.text();
                     const container = document.getElementById(file.id);
                     if (container) container.innerHTML = htmlText;
+                } else {
+                    console.error(`Failed to load ${file.url}, status:`, res.status);
                 }
             } catch (e) {
                 console.error(`Failed to load partial ${file.url}:`, e);
@@ -100,7 +105,7 @@ async function loadDashboard() {
         populateUI(data);
 
         // Fetch session data and update target IDs
-        if (data.franchise_data?.current_session) {
+        if (data.franchise_data && data.franchise_data.current_session) {
             await loadSession(data.franchise_data.current_session);
             const nextSessionId = parseInt(data.franchise_data.current_session) + 1;
             await loadUpcoming(nextSessionId);
@@ -172,6 +177,8 @@ async function loadUpcoming(upcomingSessionId) {
 }
 
 function populateUI(data) {
+    console.log("Populating UI with data object:", data);
+
     if (data.franchise_data) {
         const locHeaderEl = document.getElementById('franchise-name-display');
         if (locHeaderEl) locHeaderEl.innerText = data.franchise_data.name || '';
@@ -185,10 +192,11 @@ function populateUI(data) {
 
     const student = Array.isArray(data.student_data) ? data.student_data[0] : data.student_data;
     if (student) {
+        console.log("Matched student record for gauges:", student);
         const studentEl = document.getElementById('student-name');
         if (studentEl) studentEl.innerText = student.name || 'N/A';
 
-        // Populate all 10 student gauge metrics dynamically
+        // Direct mapping keys matching your exact database columns
         const gaugeKeys = [
             'literacy',
             'fine_motor',
@@ -203,12 +211,15 @@ function populateUI(data) {
         ];
 
         gaugeKeys.forEach(key => {
-            const val = student[key] ?? 0;
+            const val = student[key] !== undefined && student[key] !== null ? student[key] : 0;
             const targetId = `${key}-value`;
                            
             const elem = document.getElementById(targetId);
             if (elem) {
                 elem.textContent = val;
+                console.log(`Successfully bound ${targetId} -> ${val}`);
+            } else {
+                console.warn(`DOM element missing for targetId: ${targetId}`);
             }
 
             if (key === 'literacy') {
@@ -216,6 +227,8 @@ function populateUI(data) {
                 if (litContainer) litContainer.style.setProperty('--progress', `${val}%`);
             }
         });
+    } else {
+        console.warn("No student record found to populate gauges.");
     }
 
     const emailEl = document.getElementById('parent-email');
