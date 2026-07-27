@@ -248,12 +248,12 @@ body {
 }
 
 .gauge-circle.green {
-    width: 48px;
-    height: 48px;
+    width: 38px;
+    height: 38px;
     background: #2E7D32;
     border: 1px solid rgba(0, 0, 0, 0.7);
-    -webkit-mask: radial-gradient(circle, transparent 58%, black 59%);
-    mask: radial-gradient(circle, transparent 58%, black 59%);
+    -webkit-mask: radial-gradient(circle, transparent 52%, black 53%);
+    mask: radial-gradient(circle, transparent 52%, black 53%);
     padding: 0;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -268,11 +268,11 @@ body {
     background-color: transparent;
     border-radius: 0;
     color: var(--text-black);
-    font-size: 10px;
+    font-size: 8.5px;
     font-weight: 700;
     text-align: center;
     line-height: 1;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.6px;
 }
 
 .gauge-circle span {
