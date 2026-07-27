@@ -7,13 +7,13 @@
     --electric-purple: #AB47BC;
     --teal-glow: #26A69A;
     --gold-glow: #FFD700;
-    
+     
     /* Typography & Soft Contrast Colors */
     --text-black: #1A1A1A;
     --text-body: #2B2B2B;
     --text-dark: #333333;
     --white: #FFFFFF;
-    
+     
     /* Lighter, Semi-Translucent Button Gradient */
     --light-pink-purple-gradient: linear-gradient(135deg, rgba(244, 143, 177, 0.6) 0%, rgba(206, 147, 216, 0.6) 100%);
 }
@@ -24,7 +24,7 @@ body {
     margin: 0; 
     padding: 0;
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; 
-    
+     
     /* Vibrant Gradient Mesh with Re-balanced Teal Corners & Top-Right Yellow Accent */
     background-color: #CE93D8;
     background-image: 
@@ -38,7 +38,7 @@ body {
         radial-gradient(circle at 50% 100%, #FFE082 0%, transparent 60%);
     background-attachment: fixed;
     background-size: cover;
-    
+     
     height: 100dvh; 
     overflow: hidden; 
     color: var(--text-black);
@@ -248,7 +248,25 @@ body {
 }
 
 .gauge-circle.green {
-    background: conic-gradient(#1565C0 var(--progress, 0%), rgba(255, 255, 255, 0.35) 0%);
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.7);
+    -webkit-mask: none;
+    mask: none;
+    padding: 3px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.gauge-circle.green span {
+    display: inline-block !important;
+    width: 100%;
+    height: 100%;
+    background-color: #2E7D32;
+    border-radius: 50%;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 30px;
 }
 
 .gauge-circle span {
