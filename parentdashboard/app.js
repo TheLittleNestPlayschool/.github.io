@@ -245,7 +245,10 @@ function populateUI(data) {
                 const baseId = id.replace('-value', '');
                 const container = document.getElementById(`gauge-${baseId}`);
                 if (container) {
-                    container.style.background = `conic-gradient(#2196F3 ${percentage}%, #E3F2FD ${percentage}%)`;
+                    // radial-gradient creates the inner donut hole mask, conic-gradient creates the progress track
+                    container.style.background = `radial-gradient(closest-side, white 75%, transparent 76% 100%), conic-gradient(#1565C0 ${percentage}%, #BBDEFB 0)`;
+                    container.style.border = "2px solid #1A1A1A";
+                    container.style.borderRadius = "50%";
                 }
             }
         }
