@@ -27,6 +27,20 @@ function openModal(id) {
                 document.getElementById('gallery-content').innerHTML = data;
             })
             .catch(error => console.error('Error loading gallery.html:', error));
+    } else if (id === 'message-modal') {
+        fetch('message_us.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('message-content').innerHTML = data;
+            })
+            .catch(error => console.error('Error loading message_us.html:', error));
+    } else if (id === 'badges-modal') {
+        fetch('badges.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('badges-content').innerHTML = data;
+            })
+            .catch(error => console.error('Error loading badges.html:', error));
     }
 }
 
@@ -69,7 +83,7 @@ async function loadDashboard() {
             }
         }));
 
-        // Now populate user & banner details
+        // Now populate user & banner details and gauges
         populateUI(data);
 
         // Fetch session data and update target IDs
@@ -157,9 +171,31 @@ function populateUI(data) {
         const nameEl = document.getElementById('parent-name');
         if (nameEl) nameEl.innerText = `${p.first_name || ''} ${p.last_name || ''}`;
     }
-    if (data.student_data?.[0]) {
+
+    const student = data.student_data?.[0];
+    if (student) {
         const studentEl = document.getElementById('student-name');
-        if (studentEl) studentEl.innerText = data.student_data[0].name || 'N/A';
+        if (studentEl) studentEl.innerText = student.name || 'N/A';
+
+        // 9 category metrics mapping directly to student table columns and gauge IDs
+        const metrics = [
+            'literacy', 'fine_motor', 'numeracy', 'oral_lang', 
+            'gross_motor', 'receptive_lang', 'personal', 'creative_arts', 'my_world'
+        ];
+
+        metrics.forEach(metric => {
+            const el = document.getElementById(`gauge-${metric}`);
+            if (el) {
+                const value = student[metric] || 0;
+                el.style.setProperty('--progress', `${value}%`);
+            }
+        });
+
+        // Update My Hours
+        const hoursEl = document.getElementById('hours-value');
+        if (hoursEl) {
+            hoursEl.textContent = student.my_hours || 0;
+        }
     }
 
     const emailEl = document.getElementById('parent-email');
@@ -170,12 +206,6 @@ function populateUI(data) {
         
     const addressEl = document.getElementById('parent-address');
     if (addressEl && p) addressEl.innerText = p.address || 'N/A';
-
-    const progress = data.student_progress || {};
-    ['reading', 'writing', 'alphabet', 'numbers', 'manners'].forEach(type => {
-        const el = document.getElementById(`gauge-${type}`);
-        if (el) el.style.setProperty('--progress', `${progress[type] || 0}%`);
-    });
 }
 
 function enableDragScroll(containerId) {
@@ -217,4 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
     enableDragScroll('content-area');
     enableDragScroll('gauges-container');
+    
+    // Enable drag-scroll on modals after opening or dynamically if needed
+    const modalIds = ['my-data-modal', 'gallery-modal', 'message-modal', 'badges-modal'];
+    modalIds.forEach(id => {
+        enableDragScroll(id);
+    });
 });
