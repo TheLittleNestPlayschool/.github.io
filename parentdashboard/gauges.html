@@ -1,29 +1,35 @@
-
 <div class="module-box" style="height: 100%; overflow-y: auto;">
     <div class="gauge-column" style="display: flex; flex-direction: column; align-items: center; padding: 6px 0;">
         <!-- 1. Literacy -->
         <div class="gauge-wrapper" title="Literacy (Reading & Writing)" style="text-align: center; margin-bottom: 12px;">
             <div class="book-badge" id="gauge-literacy" style="position: relative; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;">
-                <!-- SVG Book Outline & Light Blue Background -->
-                <svg class="book-svg" viewBox="0 0 52 52" style="position: absolute; width: 100%; height: 100%; z-index: 2; pointer-events: none;">
-                    <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="transparent" stroke="#1A1A1A" stroke-width="2" />
+                <svg class="book-svg" viewBox="0 0 52 52" style="width: 52px; height: 52px;">
+                    <defs>
+                        <!-- Mask defining the book shape -->
+                        <mask id="book-mask">
+                            <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#FFFFFF" />
+                        </mask>
+                    </defs>
+                    
+                    <!-- Light Blue Background Base -->
+                    <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#BBDEFB" stroke="#1A1A1A" stroke-width="2" />
+                    
+                    <!-- Dark Blue Fill Rectangle masked to the book shape -->
+                    <rect id="literacy-fill-rect" x="0" y="52" width="52" height="0" fill="#1565C0" mask="url(#book-mask)" />
+                    
+                    <!-- Book Outline Stroke on Top -->
+                    <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="none" stroke="#1A1A1A" stroke-width="2" />
                 </svg>
                 
-                <!-- Light Blue Background Fill (Base) -->
-                <div style="position: absolute; inset: 4px; background: #BBDEFB; border-radius: 4px; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;">
-                    <!-- Dark Blue Fill Growing from Bottom Up -->
-                    <div id="literacy-fill-bar" style="width: 100%; height: 0%; background: #1565C0; transition: height 0.3s ease;"></div>
-                </div>
-
-                <!-- Text Value on Top -->
-                <span id="literacy-value" style="position: relative; z-index: 3; font-weight: bold; font-size: 14px; color: #1A1A1A;">-</span>
+                <!-- Text Value Centered Over SVG -->
+                <span id="literacy-value" style="position: absolute; font-weight: bold; font-size: 14px; color: #1A1A1A; z-index: 3;">-</span>
             </div>
-            <div class="gauge-label">Lit111</div>
+            <div class="gauge-label">LIT</div>
             <div class="badge-slot" id="badge-literacy"></div>
         </div>
         
         <!-- 2. Fine Motor -->
-        <div class="gauge-wrapper" title="Fine Motor (Tracing & Manipulation)" style="text-align: center; margin-bottom: 8px;">
+        <div class="gauge-wrapper" title="Fine Motor (Tracing & Manipulation)" style="text-align: center; margin-bottom: 12px;">
             <div class="gauge-circle" id="gauge-fine_motor">
                 <span id="fine_motor-value">-</span>
             </div>
@@ -32,7 +38,7 @@
         </div>
         
         <!-- 3. Numeracy -->
-        <div class="gauge-wrapper" title="Numeracy (Numbers & Logic)" style="text-align: center; margin-bottom: 8px;">
+        <div class="gauge-wrapper" title="Numeracy (Numbers & Logic)" style="text-align: center; margin-bottom: 12px;">
             <div class="gauge-circle" id="gauge-numeracy">
                 <span id="numeracy-value">-</span>
             </div>
@@ -41,11 +47,11 @@
         </div>
         
         <!-- 4. Oral Language -->
-        <div class="gauge-wrapper" title="Oral Language (Communication)" style="text-align: center; margin-bottom: 8px;">
+        <div class="gauge-wrapper" title="Oral Language (Communication)" style="text-align: center; margin-bottom: 12px;">
             <div class="gauge-circle" id="gauge-oral_lang">
                 <span id="oral_lang-value">-</span>
             </div>
-            <div class="gauge-label">Oral Language</div>
+            <div class="gauge-label">Oral Lang.</div>
             <div class="badge-slot" id="badge-oral_lang"></div>
         </div>
         
@@ -63,7 +69,7 @@
             <div class="gauge-circle" id="gauge-receptive_lang">
                 <span id="receptive_lang-value">-</span>
             </div>
-            <div class="gauge-label">Receptive Language</div>
+            <div class="gauge-label">Receptive Lang.</div>
             <div class="badge-slot" id="badge-receptive_lang"></div>
         </div>
         
@@ -72,7 +78,7 @@
             <div class="gauge-circle" id="gauge-personal">
                 <span id="personal-value">-</span>
             </div>
-            <div class="gauge-label">Personal Social</div>
+            <div class="gauge-label">P & S</div>
             <div class="badge-slot" id="badge-personal"></div>
         </div>
         
