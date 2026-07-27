@@ -63,6 +63,25 @@ async function loadDashboard() {
         const data = await response.json();
         
         console.log("Dashboard API Response:", data);
+
+        // Fetch student-specific metrics explicitly using get_students endpoint
+        const studentId = localStorage.getItem('student_id');
+        if (studentId) {
+            try {
+                const studentRes = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_students?id=${studentId}`);
+                const studentData = await studentRes.json();
+                if (studentData) {
+                    if (Array.isArray(data.student_data) && data.student_data.length > 0) {
+                        data.student_data[0] = { ...data.student_data[0], ...studentData };
+                    } else {
+                        data.student_data = [studentData];
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch explicit get_students details:", err);
+            }
+        }
+
         window.latestDashboardData = data; 
 
         if (data.franchise_data) {
