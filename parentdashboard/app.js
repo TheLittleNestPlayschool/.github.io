@@ -102,7 +102,6 @@ async function loadSession(sessionId) {
         const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_session_details?session_number=${sessionId}`);
         const data = await res.json();
         if (data) {
-            // Mapped to Xano field: todays_description
             const descEl = document.getElementById('session-short-description');
             if (descEl) descEl.innerText = data.todays_description || 'No summary available for today.';
             
@@ -129,7 +128,6 @@ async function loadUpcoming(upcomingSessionId) {
         const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_up_session_details?session_number=${upcomingSessionId}`);
         const data = await res.json();
         if (data) {
-            // Mapped to Xano field: next_description
             const descEl = document.getElementById('up-session-short-description');
             if (descEl) descEl.innerText = data.next_description || 'No summary available for next session.';
             
@@ -177,31 +175,17 @@ function populateUI(data) {
         const studentEl = document.getElementById('student-name');
         if (studentEl) studentEl.innerText = student.name || 'N/A';
 
-        // 9 category metrics mapping directly to student table columns and gauge IDs
-        const metrics = [
-            'literacy', 'fine_motor', 'numeracy', 'oral_lang', 
-            'gross_motor', 'receptive_lang', 'personal', 'creative_arts', 'my_world'
-        ];
+        // 1. Populate Literacy value directly into the center text node
+        const literacyVal = student.literacy ?? 0;
+        const litContainer = document.getElementById('gauge-literacy');
+        const litTextEl = document.getElementById('literacy-value');
+        if (litTextEl) litTextEl.textContent = literacyVal;
+        if (litContainer) litContainer.style.setProperty('--progress', `${literacyVal}%`);
 
-        metrics.forEach(metric => {
-            const el = document.getElementById(`gauge-${metric}`);
-            if (el) {
-                const value = student[metric] || 0;
-                el.style.setProperty('--progress', `${value}%`);
-                
-                // If the element has an internal text span (like literacy), update it
-                const textEl = el.querySelector('.gauge-value-text');
-                if (textEl) {
-                    textEl.textContent = value > 0 ? value : '';
-                }
-            }
-        });
-
-        // Update My Hours
-        const hoursEl = document.getElementById('hours-value');
-        if (hoursEl) {
-            hoursEl.textContent = student.my_hours || 0;
-        }
+        // 2. Populate My Hours value directly into the center text node
+        const hoursVal = student.my_hours ?? 0;
+        const hoursTextEl = document.getElementById('hours-value');
+        if (hoursTextEl) hoursTextEl.textContent = hoursVal;
     }
 
     const emailEl = document.getElementById('parent-email');
