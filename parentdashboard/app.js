@@ -229,14 +229,14 @@ function populateUI(data) {
                 continue;
             }
 
-            const percentage = (val / 10) * 100;
+            const percentage = (val / 20) * 100;
 
             if (id === 'literacy-value') {
                 const litContainer = document.getElementById('gauge-literacy');
                 if (litContainer) {
                     const clipRect = document.getElementById('book-clip-rect');
                     if (clipRect) {
-                        const heightPx = 52 - (52 * (val / 10));
+                        const heightPx = 52 - (52 * (val / 20));
                         clipRect.setAttribute('y', heightPx);
                         clipRect.setAttribute('height', 52);
                     }
@@ -245,7 +245,6 @@ function populateUI(data) {
                 const baseId = id.replace('-value', '');
                 const container = document.getElementById(`gauge-${baseId}`);
                 if (container) {
-                    // radial-gradient creates the inner donut hole mask, conic-gradient creates the progress track
                     container.style.background = `radial-gradient(closest-side, white 75%, transparent 76% 100%), conic-gradient(#1565C0 ${percentage}%, #BBDEFB 0)`;
                     container.style.border = "2px solid #1A1A1A";
                     container.style.borderRadius = "50%";
