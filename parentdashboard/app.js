@@ -64,17 +64,19 @@ async function loadDashboard() {
         
         console.log("Dashboard API Response:", data);
 
-        // Fetch student-specific metrics explicitly using get_students endpoint
-        const studentId = localStorage.getItem('student_id');
+        const studentObj = Array.isArray(data.student_data) ? data.student_data[0] : data.student_data;
+        const studentId = studentObj?.id || studentObj?.student_id;
+
         if (studentId) {
+            localStorage.setItem('student_id', studentId);
             try {
-                const studentRes = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_students?id=${studentId}`);
+                const studentRes = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_students?student_id=${studentId}`);
                 const studentData = await studentRes.json();
+                
                 if (studentData) {
-                    if (Array.isArray(data.student_data) && data.student_data.length > 0) {
-                        data.student_data[0] = { ...data.student_data[0], ...studentData };
-                    } else {
-                        data.student_data = [studentData];
+                    const actualStudent = Array.isArray(studentData) ? studentData[0] : studentData;
+                    if (actualStudent) {
+                        data.student_data = [actualStudent];
                     }
                 }
             } catch (err) {
@@ -87,11 +89,6 @@ async function loadDashboard() {
         if (data.franchise_data) {
             localStorage.setItem('franchise_id', data.franchise_data.id);
             localStorage.setItem('franchise_name', data.franchise_data.name);
-        }
-        
-        const student = Array.isArray(data.student_data) ? data.student_data[0] : data.student_data;
-        if (student && student.id) {
-            localStorage.setItem('student_id', student.id);
         }
 
         const files = [
