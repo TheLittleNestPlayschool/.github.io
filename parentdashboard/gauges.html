@@ -2,25 +2,22 @@
     <div class="gauge-column" style="display: flex; flex-direction: column; align-items: center; padding: 6px 0;">
         <!-- 1. Literacy -->
         <div class="gauge-wrapper" title="Literacy (Reading & Writing)" style="text-align: center; margin-bottom: 12px;">
-            <div class="book-badge" id="gauge-literacy">
-                <svg class="book-svg" viewBox="0 0 52 52">
-                    <!-- Light Blue Base Background (Non-filled area) -->
-                    <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="#BBDEFB" stroke="#1A1A1A" stroke-width="2" />
-                    
-                    <!-- Dark Blue Fill (Grows from bottom up inside the book shape) -->
-                    <g clip-path="url(#book-outline-clip)">
-                        <rect id="literacy-fill-rect" x="0" y="52" width="52" height="0" fill="#1565C0" />
-                    </g>
-
-                    <defs>
-                        <clipPath id="book-outline-clip">
-                            <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" />
-                        </clipPath>
-                    </defs>
+            <div class="book-badge" id="gauge-literacy" style="position: relative; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;">
+                <!-- SVG Book Outline & Light Blue Background -->
+                <svg class="book-svg" viewBox="0 0 52 52" style="position: absolute; width: 100%; height: 100%; z-index: 2; pointer-events: none;">
+                    <path d="M6 14 C 6 10, 14 8, 26 12 C 38 8, 46 10, 46 14 L 46 42 C 46 42, 38 40, 26 44 C 14 40, 6 42, 6 42 Z" fill="transparent" stroke="#1A1A1A" stroke-width="2" />
                 </svg>
-                <span id="literacy-value">-</span>
+                
+                <!-- Light Blue Background Fill (Base) -->
+                <div style="position: absolute; inset: 4px; background: #BBDEFB; border-radius: 4px; z-index: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;">
+                    <!-- Dark Blue Fill Growing from Bottom Up -->
+                    <div id="literacy-fill-bar" style="width: 100%; height: 0%; background: #1565C0; transition: height 0.3s ease;"></div>
+                </div>
+
+                <!-- Text Value on Top -->
+                <span id="literacy-value" style="position: relative; z-index: 3; font-weight: bold; font-size: 14px; color: #1A1A1A;">-</span>
             </div>
-            <div class="gauge-label">Literacy</div>
+            <div class="gauge-label">Lit</div>
             <div class="badge-slot" id="badge-literacy"></div>
         </div>
         
