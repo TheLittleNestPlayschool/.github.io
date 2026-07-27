@@ -2,11 +2,8 @@
     <div class="gauge-column" style="display: flex; flex-direction: column; align-items: center; padding: 6px 0;">
         <!-- 1. Literacy -->
         <div class="gauge-wrapper" title="Literacy (Reading & Writing)" style="text-align: center; margin-bottom: 12px;">
-            <div class="book-badge" id="gauge-literacy" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 2px solid #1A1A1A; border-radius: 8px; background: #BBDEFB; position: relative; overflow: hidden;">
-                <!-- Bottom-up fill layer -->
-                <div id="literacy-fill-layer" style="position: absolute; bottom: 0; left: 0; right: 0; height: 0%; background: #1565C0; z-index: 1; transition: height 0.3s ease;"></div>
-                <!-- Number Value -->
-                <span id="literacy-value" style="position: relative; z-index: 2; font-weight: 600; font-size: 13px; color: #1A1A1A;">-</span>
+            <div class="gauge-circle" id="gauge-literacy">
+                <span id="literacy-value">-</span>
             </div>
             <div class="gauge-label">Literacy</div>
             <div class="badge-slot" id="badge-literacy"></div>
@@ -35,7 +32,7 @@
             <div class="gauge-circle" id="gauge-oral_lang">
                 <span id="oral_lang-value">-</span>
             </div>
-            <div class="gauge-label">Oral Lang.</div>
+            <div class="gauge-label">Oral Language</div>
             <div class="badge-slot" id="badge-oral_lang"></div>
         </div>
         
@@ -53,7 +50,7 @@
             <div class="gauge-circle" id="gauge-receptive_lang">
                 <span id="receptive_lang-value">-</span>
             </div>
-            <div class="gauge-label">Receptive Lang.</div>
+            <div class="gauge-label">Receptive Language</div>
             <div class="badge-slot" id="badge-receptive_lang"></div>
         </div>
         
@@ -62,7 +59,7 @@
             <div class="gauge-circle" id="gauge-personal">
                 <span id="personal-value">-</span>
             </div>
-            <div class="gauge-label">P & S</div>
+            <div class="gauge-label">Personal Social</div>
             <div class="badge-slot" id="badge-personal"></div>
         </div>
         
