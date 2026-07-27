@@ -236,9 +236,10 @@ function populateUI(data) {
                 if (litContainer) {
                     const clipRect = document.getElementById('book-clip-rect');
                     if (clipRect) {
-                        const heightPx = 52 - (52 * (val / 20));
-                        clipRect.setAttribute('y', heightPx);
-                        clipRect.setAttribute('height', 52);
+                        // Set the clipping mask height to cover the unfilled top portion (18/20 of the height)
+                        const unfilledHeight = 52 * (1 - (val / 20));
+                        clipRect.setAttribute('y', '0');
+                        clipRect.setAttribute('height', unfilledHeight);
                     }
                 }
             } else {
