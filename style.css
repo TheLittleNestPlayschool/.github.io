@@ -1,4 +1,3 @@
-
 :root { 
     /* High-Vibrancy Palette */
     --warm-yellow: #FFD54F;
@@ -232,7 +231,8 @@ body {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: conic-gradient(var(--bright-pink) var(--progress), rgba(255, 255, 255, 0.35) 0);
+    background: conic-gradient(#1565C0 var(--progress, 0%), #BBDEFB 0%);
+    border: 2px solid rgba(26, 26, 26, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -242,7 +242,7 @@ body {
 }
 
 .gauge-circle.green {
-    background: conic-gradient(#00C853 var(--progress, 100%), rgba(255, 255, 255, 0.35) 0);
+    background: conic-gradient(#1565C0 var(--progress, 0%), #BBDEFB 0%);
 }
 
 .gauge-circle span {
@@ -255,10 +255,10 @@ body {
 
 .gauge-circle::before {
     content: "";
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     position: absolute;
