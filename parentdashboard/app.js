@@ -57,8 +57,21 @@ async function loadDashboard() {
     if (!userId) { window.location.href = './login.html'; return; }
 
     try {
-        const response = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId);
-        const data = await response.json();
+        // Fetch both parents/dashboard and student metrics in parallel
+        const [parentRes, studentRes] = await Promise.all([
+            fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId),
+            fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_students?user_id=' + userId)
+        ]);
+
+        const parentData = await parentRes.json();
+        const studentData = await studentRes.json();
+
+        // Combine both data payloads into our global dashboard container object
+        const data = {
+            ...parentData,
+            student_data: Array.isArray(studentData) ? studentData : [studentData]
+        };
+
         window.latestDashboardData = data; 
 
         // Mapping files to the grid containers in dashboard.html
@@ -170,7 +183,7 @@ function populateUI(data) {
         if (nameEl) nameEl.innerText = `${p.first_name || ''} ${p.last_name || ''}`;
     }
 
-    const student = data.student_data?.[0];
+    const student = Array.isArray(data.student_data) ? data.student_data[0] : data.student_data;
     if (student) {
         const studentEl = document.getElementById('student-name');
         if (studentEl) studentEl.innerText = student.name || 'N/A';
