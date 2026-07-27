@@ -175,17 +175,43 @@ function populateUI(data) {
         const studentEl = document.getElementById('student-name');
         if (studentEl) studentEl.innerText = student.name || 'N/A';
 
-        // 1. Populate Literacy value directly into the center text node
-        const literacyVal = student.literacy ?? 0;
-        const litContainer = document.getElementById('gauge-literacy');
-        const litTextEl = document.getElementById('literacy-value');
-        if (litTextEl) litTextEl.textContent = literacyVal;
-        if (litContainer) litContainer.style.setProperty('--progress', `${literacyVal}%`);
+        // Populate all 10 student gauge metrics dynamically
+        const gaugeKeys = [
+            'literacy',
+            'fine_motor',
+            'numeracy',
+            'oral_lang',
+            'gross_motor',
+            'receptive_lang',
+            'personal',
+            'creative_arts',
+            'my_world',
+            'my_hours'
+        ];
 
-        // 2. Populate My Hours value directly into the center text node
-        const hoursVal = student.my_hours ?? 0;
-        const hoursTextEl = document.getElementById('hours-value');
-        if (hoursTextEl) hoursTextEl.textContent = hoursVal;
+        gaugeKeys.forEach(key => {
+            const val = student[key] ?? 0;
+            
+            let targetId;
+            if (key === 'literacy') {
+                targetId = 'literacy-value';
+            } else if (key === 'my_hours') {
+                targetId = 'hours-value';
+            } else {
+                targetId = `${key}-value`;
+            }
+                           
+            const elem = document.getElementById(targetId);
+            if (elem) {
+                elem.textContent = val;
+            }
+
+            // Keep progress property update for literacy if container exists
+            if (key === 'literacy') {
+                const litContainer = document.getElementById('gauge-literacy');
+                if (litContainer) litContainer.style.setProperty('--progress', `${val}%`);
+            }
+        });
     }
 
     const emailEl = document.getElementById('parent-email');
