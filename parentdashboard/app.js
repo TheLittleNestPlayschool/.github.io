@@ -233,9 +233,8 @@ function populateUI(data) {
             const baseId = id.replace('-value', '');
             const container = document.getElementById(`gauge-${baseId}`);
             if (container) {
-                container.style.background = `radial-gradient(closest-side, white 75%, transparent 76% 100%), conic-gradient(#1565C0 ${percentage}%, #BBDEFB 0)`;
-                container.style.border = "2px solid #1A1A1A";
-                container.style.borderRadius = "50%";
+                // Set CSS custom property to work seamlessly with style.css
+                container.style.setProperty('--progress', `${percentage}%`);
             }
         }
     } else {
