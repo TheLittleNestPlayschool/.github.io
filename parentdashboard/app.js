@@ -1,3 +1,4 @@
+
 // --- Accordion Toggle Logic ---
 function toggleAccordion(element) {
     const content = element.nextElementSibling;
