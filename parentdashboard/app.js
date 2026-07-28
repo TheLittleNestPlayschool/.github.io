@@ -206,39 +206,33 @@ function populateUI(data) {
         const studentEl = document.getElementById('student-name');
         if (studentEl) studentEl.innerText = student.name || 'N/A';
 
-       const gaugeFields = {
-    'literacy-value': student.literacy,
-    'fine_motor-value': student.fine_motor,
-    'numeracy-value': student.numeracy,
-    'oral_lang-value': student.oral_lang,
-    'gross_motor-value': student.gross_motor,
-    'receptive_lang-value': student.receptive_lang,
-    'personal-value': student.personal,
-    'creative_arts-value': student.creative_arts,
-    'my_world-value': student.my_world,
-    'my_hours-value': student.my_hours // Add it right here
-};
+        const gaugeFields = {
+            'literacy-value': student.literacy,
+            'fine_motor-value': student.fine_motor,
+            'numeracy-value': student.numeracy,
+            'oral_lang-value': student.oral_lang,
+            'gross_motor-value': student.gross_motor,
+            'receptive_lang-value': student.receptive_lang,
+            'personal-value': student.personal,
+            'creative_arts-value': student.creative_arts,
+            'my_world-value': student.my_world,
+            'my_hours-value': student.my_hours
+        };
 
-for (const [id, value] of Object.entries(gaugeFields)) {
-    const el = document.getElementById(id);
-    const val = value ?? 0;
-    
-    if (el) el.textContent = val;
+        for (const [id, value] of Object.entries(gaugeFields)) {
+            const el = document.getElementById(id);
+            const val = value ?? 0;
+        
+            if (el) el.textContent = val;
 
-    // Skip percentage styling for my_hours since it's a raw value
-    if (id !== 'my_hours-value') {
-        const percentage = (val / 20) * 100;
-        const baseId = id.replace('-value', '');
-        const container = document.getElementById(`gauge-${baseId}`);
-        if (container) {
-            container.style.setProperty('--progress', `${percentage}%`);
-        }
-    }
-}
-
-        const hoursEl = document.getElementById('my_hours-value');
-        if (hoursEl) {
-            hoursEl.textContent = student.my_hours ?? 0;
+            if (id !== 'my_hours-value') {
+                const percentage = (val / 20) * 100;
+                const baseId = id.replace('-value', '');
+                const container = document.getElementById(`gauge-${baseId}`);
+                if (container) {
+                    container.style.setProperty('--progress', `${percentage}%`);
+                }
+            }
         }
     } else {
         console.warn("No student record found to populate gauges.");
