@@ -54,7 +54,6 @@ window.latestDashboardData = null;
 
 async function loadDashboard() {
     const userId = localStorage.getItem('userId');
-    const adminTypeId = localStorage.getItem('admin_type_id');
     const token = localStorage.getItem('authToken');
     if (!userId || !token) { window.location.href = './login.html'; return; }
 
@@ -62,9 +61,6 @@ async function loadDashboard() {
         console.log("Fetching dashboard data for user ID:", userId);
 
         let url = 'https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId;
-        if (adminTypeId && adminTypeId !== 'null' && adminTypeId !== 'undefined') {
-            url += '&admin_type_id=' + adminTypeId;
-        }
 
         const response = await fetch(url, {
             method: 'GET',
