@@ -225,6 +225,10 @@ function populateUI(data) {
         
             if (el) el.textContent = val;
 
+            if (id === 'my_hours-value') {
+                console.log("DEBUG: my_hours-value raw value from data:", value, "Final displayed val:", val);
+            }
+
             if (id !== 'my_hours-value') {
                 const percentage = (val / 20) * 100;
                 const baseId = id.replace('-value', '');
