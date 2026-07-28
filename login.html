@@ -57,20 +57,18 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message || 'Invalid credentials.');
 
-                const franchiseId = data.franchise_id || data.user?.franchise_id || data.parent_data?.franchise_id;
-                const userId = data.id || data.user?.id || data.user_id;
-                const adminTypeId = data.admin_type_id || data.user?.admin_type_id;
+                const franchiseId = data.franchise_id || data.user?.franchise_id;
                 
                 localStorage.setItem('authToken', data.authToken);
-                localStorage.setItem('userId', userId);
-                localStorage.setItem('admin_type_id', adminTypeId);
+                localStorage.setItem('userId', data.user);
+                localStorage.setItem('admin_type_id', data.admin_type_id);
                 localStorage.setItem('teacher_id', data.teacher_id || data.user?.teacher_id || '');
                 localStorage.setItem('franchise_id', franchiseId);
                 localStorage.setItem('franchise_name', data.franchise_name || data.user?.franchise_name || '');
 
-                if (adminTypeId === 10) {
+                if (data.admin_type_id === 10) {
                     window.location.href = './parentdashboard/dashboard.html';
-                } else if (adminTypeId === 4) {
+                } else if (data.admin_type_id === 4) {
                     window.location.href = './uploader/uploadermenu.html';
                 } else {
                     throw new Error('Invalid Admin Type');
