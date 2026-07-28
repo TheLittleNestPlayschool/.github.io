@@ -215,8 +215,7 @@ function populateUI(data) {
             'receptive_lang-value': student.receptive_lang,
             'personal-value': student.personal,
             'creative_arts-value': student.creative_arts,
-            'my_world-value': student.my_world,
-            'my_hours-value': student.my_hours
+            'my_world-value': student.my_world
         };
 
         for (const [id, value] of Object.entries(gaugeFields)) {
@@ -225,10 +224,6 @@ function populateUI(data) {
             
             if (el) el.textContent = val;
 
-            if (id === 'my_hours-value') {
-                continue;
-            }
-
             const percentage = (val / 20) * 100;
             const baseId = id.replace('-value', '');
             const container = document.getElementById(`gauge-${baseId}`);
@@ -236,6 +231,11 @@ function populateUI(data) {
                 // Set CSS custom property to work seamlessly with style.css
                 container.style.setProperty('--progress', `${percentage}%`);
             }
+        }
+
+        const hoursEl = document.getElementById('my_hours-value');
+        if (hoursEl) {
+            hoursEl.textContent = student.my_hours ?? 0;
         }
     } else {
         console.warn("No student record found to populate gauges.");
