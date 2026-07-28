@@ -1,12 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>My TLNP</title>
-    <link rel="stylesheet" href="../style.css?v=3">
-   </head>
+    <link rel="stylesheet" href="../style.css" id="main-stylesheet">
+    <script>
+        // Dynamically append cache-buster to stylesheet on load
+        document.getElementById('main-stylesheet').href = `../style.css?v=${Date.now()}`;
+    </script>
+</head>
 <body>
     <div id="app-container">
         <!-- Header Banner -->
@@ -88,7 +91,7 @@
             modal.classList.add('show');
 
             if (id === 'my-data-modal') {
-                fetch('profile.html?v=3')
+                fetch(`profile.html?v=${Date.now()}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('profile-content').innerHTML = data;
@@ -96,21 +99,21 @@
                     })
                     .catch(error => console.error('Error loading profile.html:', error));
             } else if (id === 'gallery-modal') {
-                fetch('gallery.html?v=3')
+                fetch(`gallery.html?v=${Date.now()}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('gallery-content').innerHTML = data;
                     })
                     .catch(error => console.error('Error loading gallery.html:', error));
             } else if (id === 'message-modal') {
-                fetch('message_us.html?v=3')
+                fetch(`message_us.html?v=${Date.now()}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('message-content').innerHTML = data;
                     })
                     .catch(error => console.error('Error loading message_us.html:', error));
             } else if (id === 'badges-modal') {
-                fetch('badges.html?v=3')
+                fetch(`badges.html?v=${Date.now()}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('badges-content').innerHTML = data;
