@@ -255,43 +255,43 @@ body {
 .gauge-circle.green {
     width: 38px;
     height: 38px;
-    background: #2E7D32; /* The green ring/background */
+    background: #2E7D32;
     border: 1px solid rgba(0, 0, 0, 0.7);
     border-radius: 50%;
     padding: 0;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: relative;
-    overflow: hidden;
+    display: block; /* remove flex from parent so absolute child positioning works cleanly */
 }
 
-/* This creates the inner cutout circle so the background shows through */
+/* Create the inner cutout circle using absolute positioning */
 .gauge-circle.green::before {
     content: '';
     position: absolute;
-    width: 24px; /* Adjust this size to control the thickness of the green ring */
-    height: 24px;
-    background-color: var(--dashboard-bg, #ffffff); /* Matches your dashboard background color */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 26px; /* Adjust inner hole size */
+    height: 26px;
+    background-color: var(--dashboard-bg, #ffffff); /* Matches dashboard background */
     border-radius: 50%;
     z-index: 1;
 }
 
+/* Force the text span to center itself over the hole using absolute positioning */
 .gauge-circle.green span {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
-    height: 100%;
     background-color: transparent;
-    color: var(--text-black);
+    color: var(--text-black, #000000);
     font-size: 8.5px;
     font-weight: 700;
     text-align: center;
     line-height: 1;
-    position: relative;
-    z-index: 5; /* Sits cleanly above the cutout background */
+    z-index: 10; /* Ensures text floats on top of the cutout background */
 }
 
 .gauge-circle span {
