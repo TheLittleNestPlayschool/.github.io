@@ -54,12 +54,19 @@ window.latestDashboardData = null;
 
 async function loadDashboard() {
     const userId = localStorage.getItem('userId');
-    if (!userId) { window.location.href = './login.html'; return; }
+    const token = localStorage.getItem('authToken');
+    if (!userId || !token) { window.location.href = './login.html'; return; }
 
     try {
         console.log("Fetching dashboard data for user ID:", userId);
 
-        const response = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId);
+        const response = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const data = await response.json();
         
         console.log("Dashboard API Response:", data);
@@ -70,7 +77,13 @@ async function loadDashboard() {
         if (studentId) {
             localStorage.setItem('student_id', studentId);
             try {
-                const studentRes = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_students?student_id=${studentId}`);
+                const studentRes = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_students?student_id=${studentId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const studentData = await studentRes.json();
                 
                 if (studentData) {
@@ -127,7 +140,14 @@ async function loadDashboard() {
 
 async function loadSession(sessionId) {
     try {
-        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_session_details?session_number=${sessionId}&v=${Date.now()}`);
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_session_details?session_number=${sessionId}&v=${Date.now()}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const data = await res.json();
         if (data) {
             const descEl = document.getElementById('session-short-description');
@@ -153,7 +173,14 @@ async function loadSession(sessionId) {
 
 async function loadUpcoming(upcomingSessionId) {
     try {
-        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_up_session_details?session_number=${upcomingSessionId}&v=${Date.now()}`);
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_up_session_details?session_number=${upcomingSessionId}&v=${Date.now()}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const data = await res.json();
         if (data) {
             const descEl = document.getElementById('up-session-short-description');
