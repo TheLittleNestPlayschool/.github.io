@@ -61,7 +61,12 @@ async function loadDashboard() {
     try {
         console.log("Fetching dashboard data for user ID:", userId);
 
-        const response = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId + '&admin_type_id=' + adminTypeId, {
+        let url = 'https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId;
+        if (adminTypeId && adminTypeId !== 'null' && adminTypeId !== 'undefined') {
+            url += '&admin_type_id=' + adminTypeId;
+        }
+
+        const response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
