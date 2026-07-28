@@ -1,4 +1,3 @@
-
 :root { 
     /* High-Vibrancy Palette */
     --warm-yellow: #FFD54F;
@@ -296,7 +295,7 @@ body {
     z-index: 5;
 }
 
-.gauge-circle span {
+.gauge-circle:not(.green) span {
     display: none;
 }
 
