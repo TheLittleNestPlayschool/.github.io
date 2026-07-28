@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>My TLNP</title>
-    <link rel="stylesheet" href="../style.css?v=2">
+    <link rel="stylesheet" href="../style.css?v=3">
    </head>
 <body>
     <div id="app-container">
@@ -87,7 +87,7 @@
             modal.classList.add('show');
 
             if (id === 'my-data-modal') {
-                fetch('profile.html')
+                fetch('profile.html?v=3')
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('profile-content').innerHTML = data;
@@ -95,21 +95,21 @@
                     })
                     .catch(error => console.error('Error loading profile.html:', error));
             } else if (id === 'gallery-modal') {
-                fetch('gallery.html')
+                fetch('gallery.html?v=3')
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('gallery-content').innerHTML = data;
                     })
                     .catch(error => console.error('Error loading gallery.html:', error));
             } else if (id === 'message-modal') {
-                fetch('message_us.html')
+                fetch('message_us.html?v=3')
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('message-content').innerHTML = data;
                     })
                     .catch(error => console.error('Error loading message_us.html:', error));
             } else if (id === 'badges-modal') {
-                fetch('badges.html')
+                fetch('badges.html?v=3')
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById('badges-content').innerHTML = data;
