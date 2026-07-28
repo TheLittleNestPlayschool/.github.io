@@ -260,38 +260,39 @@ body {
     border-radius: 50%;
     padding: 0;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
-    display: block; /* remove flex from parent so absolute child positioning works cleanly */
+    overflow: hidden;
 }
 
-/* Create the inner cutout circle using absolute positioning */
+/* Inner cutout to let the background show through */
 .gauge-circle.green::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 26px; /* Adjust inner hole size */
-    height: 26px;
-    background-color: var(--dashboard-bg, #ffffff); /* Matches dashboard background */
+    width: 24px;
+    height: 24px;
+    background-color: var(--dashboard-bg, #ffffff);
     border-radius: 50%;
     z-index: 1;
 }
 
-/* Force the text span to center itself over the hole using absolute positioning */
+/* Standard flex centering so the text sits directly in the middle */
 .gauge-circle.green span {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
     width: 100%;
+    height: 100%;
     background-color: transparent;
-    color: var(--text-black, #000000);
+    color: var(--text-black);
     font-size: 8.5px;
     font-weight: 700;
     text-align: center;
     line-height: 1;
-    z-index: 10; /* Ensures text floats on top of the cutout background */
+    position: relative;
+    z-index: 5;
 }
 
 .gauge-circle span {
