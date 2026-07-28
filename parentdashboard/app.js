@@ -11,7 +11,7 @@ function openModal(id) {
     modal.classList.add('show');
 
     if (id === 'my-data-modal') {
-        fetch('profile.html')
+        fetch('profile.html?v=2')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('profile-content').innerHTML = data;
@@ -21,21 +21,21 @@ function openModal(id) {
             })
             .catch(error => console.error('Error loading profile.html:', error));
     } else if (id === 'gallery-modal') {
-        fetch('gallery.html')
+        fetch('gallery.html?v=2')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('gallery-content').innerHTML = data;
             })
             .catch(error => console.error('Error loading gallery.html:', error));
     } else if (id === 'message-modal') {
-        fetch('message_us.html')
+        fetch('message_us.html?v=2')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('message-content').innerHTML = data;
             })
             .catch(error => console.error('Error loading message_us.html:', error));
     } else if (id === 'badges-modal') {
-        fetch('badges.html')
+        fetch('badges.html?v=2')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('badges-content').innerHTML = data;
@@ -92,10 +92,10 @@ async function loadDashboard() {
         }
 
         const files = [
-            { id: 'gauges-container', url: './gauges.html' },
-            { id: 'current-container', url: './recap.html' },
-            { id: 'upcoming-container', url: './upcoming.html' },
-            { id: 'gallery-container', url: './gallery_main.html' }
+            { id: 'gauges-container', url: './gauges.html?v=2' },
+            { id: 'current-container', url: './recap.html?v=2' },
+            { id: 'upcoming-container', url: './upcoming.html?v=2' },
+            { id: 'gallery-container', url: './gallery_main.html?v=2' }
         ];
 
         await Promise.all(files.map(async (file) => {
@@ -127,7 +127,7 @@ async function loadDashboard() {
 
 async function loadSession(sessionId) {
     try {
-        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_session_details?session_number=${sessionId}`);
+        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_session_details?session_number=${sessionId}&v=2`);
         const data = await res.json();
         if (data) {
             const descEl = document.getElementById('session-short-description');
@@ -153,7 +153,7 @@ async function loadSession(sessionId) {
 
 async function loadUpcoming(upcomingSessionId) {
     try {
-        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_up_session_details?session_number=${upcomingSessionId}`);
+        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/get_up_session_details?session_number=${upcomingSessionId}&v=2`);
         const data = await res.json();
         if (data) {
             const descEl = document.getElementById('up-session-short-description');
