@@ -58,9 +58,9 @@ async function loadDashboard() {
     if (!userId || !token) { window.location.href = './login.html'; return; }
 
     try {
-        console.log("Fetching dashboard data for user ID:", userId);
+        console.log("Fetching dashboard data for userchanged heheh ID:", userId);
 
-        let url = 'https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents?user_id=' + userId;
+        let url = 'https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents;
 
         const response = await fetch(url, {
             method: 'GET',
