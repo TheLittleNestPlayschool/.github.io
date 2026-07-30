@@ -55,12 +55,12 @@ window.latestDashboardData = null;
 async function loadDashboard() {
     const userId = localStorage.getItem('userId');
     const token = localStorage.getItem('authToken');
-    if (!userId || !token) { window.location.href = './login.html'; return; }
+    if (!token) { window.location.href = './login.html'; return; }
 
     try {
         console.log("Fetching dashboard data for userchanged heheh ID:", userId);
 
-        let url = 'https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents;
+        let url = 'https://x8ki-letl-twmt.n7.xano.io/api:wtEDiEuV/parents';
 
         const response = await fetch(url, {
             method: 'GET',
